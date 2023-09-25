@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"errors"
-	"github.com/kimoscloud/user-management-service/app/domain"
+	"github.com/kimoscloud/user-management-service/internal/core/model/entity"
 	types "github.com/kimoscloud/value-types/domain"
 	"gorm.io/gorm"
 	"math"
@@ -16,8 +16,8 @@ func NewUserRepository(db *gorm.DB) *UserRepositoryPostgres {
 	return &UserRepositoryPostgres{db: db}
 }
 
-func (repo *UserRepositoryPostgres) GetAll() ([]domain.User, error) {
-	var users []domain.User
+func (repo *UserRepositoryPostgres) GetAll() ([]entity.User, error) {
+	var users []entity.User
 	if err := repo.db.Find(&users).Error; err != nil {
 		return nil, err
 	}
@@ -31,15 +31,15 @@ func calculateTotalPages(totalRows int, pageSize int) int {
 	return int(math.Ceil(float64(totalRows) / float64(pageSize)))
 }
 
-func (repo *UserRepositoryPostgres) GetPage(pageNumber int, pageSize int) (types.Page[domain.User], error) {
+func (repo *UserRepositoryPostgres) GetPage(pageNumber int, pageSize int) (types.Page[entity.User], error) {
 	var totalRows int64
-	repo.db.Model(&domain.User{}).Count(&totalRows)
+	repo.db.Model(&entity.User{}).Count(&totalRows)
 	totalPages := calculateTotalPages(int(totalRows), pageSize)
-	var users []domain.User
+	var users []entity.User
 	if err := repo.db.Offset((pageNumber - 1) * pageSize).Limit(pageSize).Find(&users).Error; err != nil {
-		return types.EmptyPage[domain.User](), err
+		return types.EmptyPage[entity.User](), err
 	}
-	pageBuilder := new(types.PageBuilder[domain.User])
+	pageBuilder := new(types.PageBuilder[entity.User])
 	return pageBuilder.SetItems(users).
 		SetTotal(int(totalRows)).
 		SetPageSize(pageSize).
@@ -47,13 +47,13 @@ func (repo *UserRepositoryPostgres) GetPage(pageNumber int, pageSize int) (types
 		SetTotalPages(totalPages).
 		Build(), nil
 }
-func (repo *UserRepositoryPostgres) GetByID(id string) (*domain.User, error) {
+func (repo *UserRepositoryPostgres) GetByID(id string) (*entity.User, error) {
 	return nil, errors.New("unimplemented")
 }
-func (repo *UserRepositoryPostgres) Create(user *domain.User) (*domain.User, error) {
+func (repo *UserRepositoryPostgres) Create(user *entity.User) (*entity.User, error) {
 	return nil, errors.New("unimplemented")
 }
-func (repo *UserRepositoryPostgres) Update(user *domain.User) (*domain.User, error) {
+func (repo *UserRepositoryPostgres) Update(user *entity.User) (*entity.User, error) {
 	return nil, errors.New("unimplemented")
 }
 func (repo *UserRepositoryPostgres) Delete(id string) error {

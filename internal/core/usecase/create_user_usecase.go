@@ -1,8 +1,8 @@
 package usecase
 
 import (
-	"github.com/kimoscloud/user-management-service/app/domain"
-	"github.com/kimoscloud/user-management-service/app/repository"
+	"github.com/kimoscloud/user-management-service/internal/core/model/entity"
+	"github.com/kimoscloud/user-management-service/internal/core/ports/repository"
 )
 
 type CreateUserUseCase struct {
@@ -13,7 +13,7 @@ func NewCreateUserUseCase(ur repository.UserRepository) *CreateUserUseCase {
 	return &CreateUserUseCase{userRepository: ur}
 }
 
-func (p *CreateUserUseCase) Handler(user *domain.User) (*domain.User, error) {
+func (p *CreateUserUseCase) Handler(user *entity.User) (*entity.User, error) {
 	//TODO make the validations here
 	return p.userRepository.Create(user)
 }
