@@ -1,32 +1,3 @@
-//package main
-//
-//import (
-//	"github.com/joho/godotenv"
-//	"github.com/kimoscloud/user-management-service/internal/core/usecase"
-//	"github.com/kimoscloud/user-management-service/internal/infrastructure/db"
-//	"github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres"
-//	"log"
-//	"os"
-//	"os/signal"
-//	"syscall"
-//)
-//
-//func main() {
-//	if os.Getenv("ENV") == "dev" {
-//		err := godotenv.Load("../.env")
-//		if err != nil {
-//			panic("Error loading .env file")
-//		}
-//	}
-//	connection, err := db.NewConnection()
-//	if err != nil {
-//		panic("error connecting to the database")
-//	}
-//	userRepository := postgres.NewUserRepository(connection)
-//	_ = usecase.NewCreateUserUseCase(userRepository)
-//
-//}
-
 package main
 
 import (
