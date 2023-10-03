@@ -48,13 +48,38 @@ func (repo *UserRepositoryPostgres) GetPage(pageNumber int, pageSize int) (types
 		Build(), nil
 }
 func (repo *UserRepositoryPostgres) GetByID(id string) (*entity.User, error) {
-	return nil, errors.New("unimplemented")
+	result := repo.db.Model(&entity.User{}).Where("id = ?", id).First(&id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	var user entity.User
+	result.Scan(&user)
+	return &user, nil
 }
+func (repo *UserRepositoryPostgres) GetByEmail(email string) (*entity.User, error) {
+	result := repo.db.Model(&entity.User{}).Where("email = ?", email).First(&email)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	var user entity.User
+	result.Scan(&user)
+	return &user, nil
+}
+
 func (repo *UserRepositoryPostgres) Create(user *entity.User) (*entity.User, error) {
-	return nil, errors.New("unimplemented")
+	result := repo.db.Create(user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return repo.GetByID(user.ID)
 }
 func (repo *UserRepositoryPostgres) Update(user *entity.User) (*entity.User, error) {
-	return nil, errors.New("unimplemented")
+	result := repo.db.Updates(user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return repo.GetByID(user.ID)
 }
 func (repo *UserRepositoryPostgres) Delete(id string) error {
 	return errors.New("unimplemented")

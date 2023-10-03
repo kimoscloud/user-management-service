@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/kimoscloud/user-management-service/internal/core/model/request"
+	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	"github.com/kimoscloud/user-management-service/internal/core/usecase"
 	"net/http"
 )
@@ -10,6 +11,7 @@ import (
 type UserController struct {
 	gin               *gin.Engine
 	createUserUseCase *usecase.CreateUserUseCase
+	logger            *logging.Logger
 }
 
 func NewUserController(
@@ -22,23 +24,25 @@ func NewUserController(
 }
 
 func (u UserController) InitRouter() {
-	api := u.gin.Group("/api/v1")
+	api := u.gin.Group("/api/v1/user")
 	api.POST("/signup", u.signUp)
 }
 
 func (u UserController) signUp(c *gin.Context) {
-	_, err := u.parseSignUpRequest(c)
+	signUpRequest, err := u.parseSignUpRequest(c)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusOK, &gin.H{
+		c.AbortWithStatusJSON(http.StatusBadRequest, &gin.H{
 			"message": "Invalid request",
 		})
 		return
 	}
-
-	_, err = u.createUserUseCase.Handler(nil)
+	result, appError := u.createUserUseCase.Handler(signUpRequest)
 	if err != nil {
+		c.AbortWithStatusJSON(appError.HTTPStatus, appError)
 		return
 	}
+	c.JSON(http.StatusOK, result)
+	return
 }
 
 func (u UserController) parseSignUpRequest(ctx *gin.Context) (*request.SignUpRequest, error) {
