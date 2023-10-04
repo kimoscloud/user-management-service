@@ -47,22 +47,26 @@ func (repo *UserRepositoryPostgres) GetPage(pageNumber int, pageSize int) (types
 		SetTotalPages(totalPages).
 		Build(), nil
 }
+
 func (repo *UserRepositoryPostgres) GetByID(id string) (*entity.User, error) {
-	result := repo.db.Model(&entity.User{}).Where("id = ?", id).First(&id)
+	var user entity.User
+	result := repo.db.Model(&entity.User{}).Where("id = ?", id).First(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	var user entity.User
 	result.Scan(&user)
 	return &user, nil
 }
+
 func (repo *UserRepositoryPostgres) GetByEmail(email string) (*entity.User, error) {
-	result := repo.db.Model(&entity.User{}).Where("email = ?", email).First(&email)
+	var user entity.User
+	result := repo.db.Model(&entity.User{}).Where("email = ?", email).First(&user)
 	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, result.Error
 	}
-	var user entity.User
-	result.Scan(&user)
 	return &user, nil
 }
 
@@ -71,9 +75,9 @@ func (repo *UserRepositoryPostgres) Create(user *entity.User) (*entity.User, err
 	if result.Error != nil {
 		return nil, result.Error
 	}
-
 	return repo.GetByID(user.ID)
 }
+
 func (repo *UserRepositoryPostgres) Update(user *entity.User) (*entity.User, error) {
 	result := repo.db.Updates(user)
 	if result.Error != nil {

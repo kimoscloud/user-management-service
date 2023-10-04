@@ -11,14 +11,16 @@ import (
 type UserController struct {
 	gin               *gin.Engine
 	createUserUseCase *usecase.CreateUserUseCase
-	logger            *logging.Logger
+	logger            logging.Logger
 }
 
 func NewUserController(
 	gin *gin.Engine,
+	logger logging.Logger,
 	createUserUseCase *usecase.CreateUserUseCase) UserController {
 	return UserController{
 		gin:               gin,
+		logger:            logger,
 		createUserUseCase: createUserUseCase,
 	}
 }
@@ -36,12 +38,12 @@ func (u UserController) signUp(c *gin.Context) {
 		})
 		return
 	}
-	result, appError := u.createUserUseCase.Handler(signUpRequest)
-	if err != nil {
+	_, appError := u.createUserUseCase.Handler(signUpRequest)
+	if appError != nil {
 		c.AbortWithStatusJSON(appError.HTTPStatus, appError)
 		return
 	}
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusCreated, gin.H{})
 	return
 }
 

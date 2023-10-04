@@ -7,15 +7,16 @@ import (
 	"github.com/kimoscloud/user-management-service/internal/core/ports/repository"
 	"github.com/kimoscloud/value-types/errors"
 	"github.com/kimoscloud/value-types/is_valid"
+	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
 type CreateUserUseCase struct {
 	userRepository repository.UserRepository
-	logger         *logging.Logger
+	logger         logging.Logger
 }
 
-func NewCreateUserUseCase(ur repository.UserRepository, logger *logging.Logger) *CreateUserUseCase {
+func NewCreateUserUseCase(ur repository.UserRepository, logger logging.Logger) *CreateUserUseCase {
 	return &CreateUserUseCase{userRepository: ur, logger: logger}
 }
 
@@ -26,11 +27,21 @@ func (p *CreateUserUseCase) Handler(req *request.SignUpRequest) (*entity.User, *
 	}
 	user, err := p.userRepository.GetByEmail(req.Email)
 	if err != nil {
-		return nil, errors.NewInternalServerError("Error getting user by email", "", errors.ErrorGettingUser).AppError
+		return nil, errors.NewInternalServerError("Error getting user by email", "", errors.ErrorCreatingUser).AppError
+	}
+	if user != nil {
+		p.logger.Error("User already exists", "email", req.Email)
+		return nil, errors.NewBadRequestError("User already exists", "", errors.ErrorCreatingUser).AppError
+	}
+
+	hashedPassword, err := hashAndSalt(req.Password)
+	if err != nil {
+		p.logger.Error("Error hashing password", "error", err.Error())
+		return nil, errors.NewInternalServerError("Error creating the user", "", errors.ErrorCreatingUser).AppError
 	}
 	user = &entity.User{
 		Email:                      req.Email,
-		Hash:                       req.Password,
+		Hash:                       hashedPassword,
 		BadLoginAttempts:           0,
 		IsLocked:                   false,
 		AcceptTermsAndConditions:   req.AcceptTermsAndConditions,
@@ -44,6 +55,15 @@ func (p *CreateUserUseCase) Handler(req *request.SignUpRequest) (*entity.User, *
 		return nil, errors.NewInternalServerError("Error creating user", "", errors.ErrorCreatingUser).AppError
 	}
 	return createUserResult, nil
+}
+
+func hashAndSalt(pwd string) (string, error) {
+	bytePassword := []byte(pwd)
+	hash, err := bcrypt.GenerateFromPassword(bytePassword, 10)
+	if err != nil {
+		return "", err
+	}
+	return string(hash), nil
 }
 
 func validateSignUpRequest(signUpRequest *request.SignUpRequest) *errors.AppError {

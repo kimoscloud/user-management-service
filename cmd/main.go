@@ -7,6 +7,7 @@ import (
 	"github.com/kimoscloud/user-management-service/internal/core/usecase"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/configuration"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/db"
+	"github.com/kimoscloud/user-management-service/internal/infrastructure/logging"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/server"
 	"log"
@@ -29,13 +30,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to new database err=%s\n", err.Error())
 	}
+	logger, err := logging.NewLogger()
+	if err != nil {
+		log.Fatalf("failed to new logger err=%s\n", err.Error())
+	}
 	// Create the UserRepository
 	userRepo := postgres.NewUserRepository(conn)
-	// Create the UserService
-	createUserUseCase := usecase.NewCreateUserUseCase(userRepo)
-	// Create the UserController
-	userController := controller.NewUserController(instance, createUserUseCase)
-	// Initialize the routes for UserController
+
+	createUserUseCase := usecase.NewCreateUserUseCase(userRepo, logger)
+
+	userController := controller.NewUserController(instance, logger, createUserUseCase)
+
 	userController.InitRouter()
 	// Create the HTTP server
 	httpServer := server.NewHttpServer(
