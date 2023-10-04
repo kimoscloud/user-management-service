@@ -9,25 +9,47 @@ import (
 )
 
 type UserController struct {
-	gin               *gin.Engine
-	createUserUseCase *usecase.CreateUserUseCase
-	logger            logging.Logger
+	gin                     *gin.Engine
+	createUserUseCase       *usecase.CreateUserUseCase
+	authenticateUserUseCase *usecase.AuthenticateUserUseCase
+	logger                  logging.Logger
 }
 
 func NewUserController(
 	gin *gin.Engine,
 	logger logging.Logger,
-	createUserUseCase *usecase.CreateUserUseCase) UserController {
+	createUserUseCase *usecase.CreateUserUseCase,
+	authenticateUserUseCase *usecase.AuthenticateUserUseCase,
+) UserController {
 	return UserController{
-		gin:               gin,
-		logger:            logger,
-		createUserUseCase: createUserUseCase,
+		gin:                     gin,
+		logger:                  logger,
+		createUserUseCase:       createUserUseCase,
+		authenticateUserUseCase: authenticateUserUseCase,
 	}
 }
 
 func (u UserController) InitRouter() {
 	api := u.gin.Group("/api/v1/user")
 	api.POST("/signup", u.signUp)
+	api.POST("/login", u.login)
+}
+
+func (u UserController) login(c *gin.Context) {
+	signInRequest, err := u.parseLoginRequest(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, &gin.H{
+			"message": "Invalid request",
+		})
+		return
+	}
+	result, appError := u.authenticateUserUseCase.Handler(*signInRequest)
+	if appError != nil {
+		c.AbortWithStatusJSON(appError.HTTPStatus, appError)
+		return
+	}
+	c.JSON(http.StatusOK, result)
+	return
 }
 
 func (u UserController) signUp(c *gin.Context) {
@@ -49,6 +71,14 @@ func (u UserController) signUp(c *gin.Context) {
 
 func (u UserController) parseSignUpRequest(ctx *gin.Context) (*request.SignUpRequest, error) {
 	var req request.SignUpRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		return nil, err
+	}
+	return &req, nil
+}
+
+func (u UserController) parseLoginRequest(ctx *gin.Context) (*request.LoginRequest, interface{}) {
+	var req request.LoginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		return nil, err
 	}
