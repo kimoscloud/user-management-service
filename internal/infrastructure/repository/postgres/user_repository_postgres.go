@@ -31,7 +31,10 @@ func calculateTotalPages(totalRows int, pageSize int) int {
 	return int(math.Ceil(float64(totalRows) / float64(pageSize)))
 }
 
-func (repo *UserRepositoryPostgres) GetPage(pageNumber int, pageSize int) (types.Page[entity.User], error) {
+func (repo *UserRepositoryPostgres) GetPage(
+	pageNumber int,
+	pageSize int,
+) (types.Page[entity.User], error) {
 	var totalRows int64
 	repo.db.Model(&entity.User{}).Count(&totalRows)
 	totalPages := calculateTotalPages(int(totalRows), pageSize)
@@ -52,15 +55,23 @@ func (repo *UserRepositoryPostgres) GetByID(id string) (*entity.User, error) {
 	var user entity.User
 	result := repo.db.Model(&entity.User{}).Where("id = ?", id).First(&user)
 	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, result.Error
 	}
-	result.Scan(&user)
 	return &user, nil
 }
 
-func (repo *UserRepositoryPostgres) GetByEmail(email string) (*entity.User, error) {
+func (repo *UserRepositoryPostgres) GetByEmail(email string) (
+	*entity.User,
+	error,
+) {
 	var user entity.User
-	result := repo.db.Model(&entity.User{}).Where("email = ?", email).First(&user)
+	result := repo.db.Model(&entity.User{}).Where(
+		"email = ?",
+		email,
+	).First(&user)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -70,7 +81,10 @@ func (repo *UserRepositoryPostgres) GetByEmail(email string) (*entity.User, erro
 	return &user, nil
 }
 
-func (repo *UserRepositoryPostgres) Create(user *entity.User) (*entity.User, error) {
+func (repo *UserRepositoryPostgres) Create(user *entity.User) (
+	*entity.User,
+	error,
+) {
 	result := repo.db.Create(user)
 	if result.Error != nil {
 		return nil, result.Error
@@ -78,7 +92,10 @@ func (repo *UserRepositoryPostgres) Create(user *entity.User) (*entity.User, err
 	return repo.GetByID(user.ID)
 }
 
-func (repo *UserRepositoryPostgres) Update(user *entity.User) (*entity.User, error) {
+func (repo *UserRepositoryPostgres) Update(user *entity.User) (
+	*entity.User,
+	error,
+) {
 	result := repo.db.Updates(user)
 	if result.Error != nil {
 		return nil, result.Error

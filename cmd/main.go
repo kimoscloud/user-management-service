@@ -38,17 +38,29 @@ func main() {
 	userRepo := postgres.NewUserRepository(conn)
 
 	createUserUseCase := usecase.NewCreateUserUseCase(userRepo, logger)
-	authenticateUserUseCase := usecase.NewAuthenticateUserUseCase(userRepo, logger)
-	userController := controller.NewUserController(instance, logger, createUserUseCase, authenticateUserUseCase)
+	authenticateUserUseCase := usecase.NewAuthenticateUserUseCase(
+		userRepo,
+		logger,
+	)
+	getUserUseCase := usecase.NewGetUserUseCase(userRepo, logger)
+	updateUserProfileUseCase := usecase.NewUpdateUserProfileUseCase(
+		userRepo,
+		logger,
+	)
+	userController := controller.NewUserController(
+		instance,
+		logger,
+		createUserUseCase,
+		authenticateUserUseCase,
+		getUserUseCase,
+		updateUserProfileUseCase,
+	)
 
 	userController.InitRouter()
-	// Create the HTTP server
 	httpServer := server.NewHttpServer(
 		instance,
 		configuration.GetHttpServerConfig(),
 	)
-
-	// Start the HTTP server
 	httpServer.Start()
 	defer httpServer.Stop()
 

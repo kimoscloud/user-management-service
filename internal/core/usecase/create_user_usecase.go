@@ -16,28 +16,46 @@ type CreateUserUseCase struct {
 	logger         logging.Logger
 }
 
-func NewCreateUserUseCase(ur repository.UserRepository, logger logging.Logger) *CreateUserUseCase {
+func NewCreateUserUseCase(
+	ur repository.UserRepository,
+	logger logging.Logger,
+) *CreateUserUseCase {
 	return &CreateUserUseCase{userRepository: ur, logger: logger}
 }
 
-func (p *CreateUserUseCase) Handler(req *request.SignUpRequest) (*entity.User, *errors.AppError) {
+func (p *CreateUserUseCase) Handler(req *request.SignUpRequest) (
+	*entity.User,
+	*errors.AppError,
+) {
 	appError := validateSignUpRequest(req)
 	if appError != nil {
 		return nil, appError
 	}
 	user, err := p.userRepository.GetByEmail(req.Email)
 	if err != nil {
-		return nil, errors.NewInternalServerError("Error getting user by email", "", errors.ErrorCreatingUser).AppError
+		return nil, errors.NewInternalServerError(
+			"Error getting user by email",
+			"",
+			errors.ErrorCreatingUser,
+		).AppError
 	}
 	if user != nil {
 		p.logger.Error("User already exists", "email", req.Email)
-		return nil, errors.NewBadRequestError("User already exists", "", errors.ErrorCreatingUser).AppError
+		return nil, errors.NewBadRequestError(
+			"User already exists",
+			"",
+			errors.ErrorCreatingUser,
+		).AppError
 	}
 
 	hashedPassword, err := hashAndSalt(req.Password)
 	if err != nil {
-		p.logger.Error("Error hashing password", "error", err.Error())
-		return nil, errors.NewInternalServerError("Error creating the user", "", errors.ErrorCreatingUser).AppError
+		p.logger.Error("Error hashing password", "errors", err.Error())
+		return nil, errors.NewInternalServerError(
+			"Error creating the user",
+			"",
+			errors.ErrorCreatingUser,
+		).AppError
 	}
 	user = &entity.User{
 		Email:                      req.Email,
@@ -51,8 +69,12 @@ func (p *CreateUserUseCase) Handler(req *request.SignUpRequest) (*entity.User, *
 	}
 	createUserResult, err := p.userRepository.Create(user)
 	if err != nil {
-		p.logger.Error("Error creating user", "error", err.Error())
-		return nil, errors.NewInternalServerError("Error creating user", "", errors.ErrorCreatingUser).AppError
+		p.logger.Error("Error creating user", "errors", err.Error())
+		return nil, errors.NewInternalServerError(
+			"Error creating user",
+			"",
+			errors.ErrorCreatingUser,
+		).AppError
 	}
 	return createUserResult, nil
 }
@@ -68,16 +90,32 @@ func hashAndSalt(pwd string) (string, error) {
 
 func validateSignUpRequest(signUpRequest *request.SignUpRequest) *errors.AppError {
 	if !signUpRequest.AcceptTermsAndConditions {
-		return errors.NewBadRequestError("User must accept terms and conditions", "", errors.ErrorUserNotAcceptTermsAndConditions).AppError
+		return errors.NewBadRequestError(
+			"User must accept terms and conditions",
+			"",
+			errors.ErrorUserNotAcceptTermsAndConditions,
+		).AppError
 	}
 	if !is_valid.IsValidEmail(signUpRequest.Email) {
-		return errors.NewBadRequestError("Invalid email", "", errors.ErrorInvalidEmail).AppError
+		return errors.NewBadRequestError(
+			"Invalid email",
+			"",
+			errors.ErrorInvalidEmail,
+		).AppError
 	}
 	if !is_valid.IsValidPassword(signUpRequest.Password) {
-		return errors.NewBadRequestError("Invalid password", "", errors.ErrorPasswordDoesntHaveTheRequestedFormat).AppError
+		return errors.NewBadRequestError(
+			"Invalid password",
+			"",
+			errors.ErrorPasswordDoesntHaveTheRequestedFormat,
+		).AppError
 	}
 	if signUpRequest.Password != signUpRequest.ConfirmPassword {
-		return errors.NewBadRequestError("Password and confirm password don't match", "", errors.ErrorPasswordDoesntMatch).AppError
+		return errors.NewBadRequestError(
+			"Password and confirm password don't match",
+			"",
+			errors.ErrorPasswordDoesntMatch,
+		).AppError
 	}
 	return nil
 }

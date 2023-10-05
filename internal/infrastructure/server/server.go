@@ -22,7 +22,10 @@ type httpServer struct {
 	server *http.Server
 }
 
-func NewHttpServer(router *gin.Engine, config *configuration.HttpServerConfig) HttpServer {
+func NewHttpServer(
+	router *gin.Engine,
+	config *configuration.HttpServerConfig,
+) HttpServer {
 	return &httpServer{
 		Port: config.GetPort(),
 		server: &http.Server{

@@ -1,20 +1,20 @@
 version: '3'
 services:
-#  user-managment-service:
-#    build: .
-#    ports:
-#      - "10101:10101"
-#    depends_on:
-#      - postgres
-#      - redis
-#    environment:
-#      - DB_HOST=postgres
-#      - DB_NAME=user_management
-#      - DB_USER=kimos
-#      - DB_PASS=1234
-#      - DB_PORT=20202
-#      - REDIS_HOST=redis
-#      - REDIS_PORT=6379
+  #  user-managment-service:
+  #    build: .
+  #    ports:
+  #      - "10101:10101"
+  #    depends_on:
+  #      - postgres
+  #      - redis
+  #    environment:
+  #      - DB_HOST=postgres
+  #      - DB_NAME=user_management
+  #      - DB_USER=kimos
+  #      - DB_PASS=1234
+  #      - DB_PORT=20202
+  #      - REDIS_HOST=redis
+  #      - REDIS_PORT=6379
   postgres:
     image: postgres:latest
     ports:
