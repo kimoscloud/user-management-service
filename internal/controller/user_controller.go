@@ -15,6 +15,7 @@ type UserController struct {
 	authenticateUserUseCase  *usecase.AuthenticateUserUseCase
 	getUserUseCase           *usecase.GetUserUseCase
 	updateUserProfileUseCase *usecase.UpdateUserProfileUseCase
+	changePasswordUsecase    *usecase.ChangePasswordUsecase
 	logger                   logging.Logger
 }
 
@@ -40,11 +41,18 @@ func (u UserController) InitRouter() {
 	api := u.gin.Group("/api/v1/user")
 	api.POST("/signup", u.signUp)
 	api.POST("/login", u.login)
+
 	secured := api.Group("", middleware.Auth())
 	{
 		secured.GET("/me", u.me)
 		secured.PUT("/me", u.updateProfile)
+		secured.POST("/validate-token", u.validateToken)
+		secured.POST("/password", u.changePassword)
 	}
+}
+
+func (u UserController) validateToken(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{})
 }
 
 func (u UserController) login(c *gin.Context) {
@@ -117,6 +125,30 @@ func (u UserController) me(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+func (u UserController) changePassword(c *gin.Context) {
+	userId := c.GetString("kimosUserId")
+	changePasswordRequest, err := u.parseChangePasswordRequest(c)
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusBadRequest, &gin.H{
+				"message": "Invalid request",
+			},
+		)
+		return
+	}
+	changePasswordRequest.IsValid()
+	appError := u.changePasswordUsecase.Handle(userId, changePasswordRequest)
+	if appError != nil {
+		c.AbortWithStatusJSON(appError.HTTPStatus, appError)
+		return
+	}
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status": "success",
+		},
+	)
+}
+
 func (u UserController) parseSignUpRequest(ctx *gin.Context) (
 	*request.SignUpRequest,
 	error,
@@ -145,6 +177,17 @@ func (u UserController) parseUpdateProfileRequest(ctx *gin.Context) (
 ) {
 	var req request.UpdateProfileRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
+		return nil, err
+	}
+	return &req, nil
+}
+
+func (u UserController) parseChangePasswordRequest(c *gin.Context) (
+	*request.ChangePasswordRequest,
+	error,
+) {
+	var req request.ChangePasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		return nil, err
 	}
 	return &req, nil

@@ -18,13 +18,18 @@ func Auth() gin.HandlerFunc {
 			context.Abort()
 			return
 		}
+		authorizationHeaderSplitted := strings.Split(tokenString, "Bearer ")
+		if len(authorizationHeaderSplitted) != 2 {
+			context.AbortWithStatusJSON(
+				401, gin.H{
+					"message": "Invalid token",
+				},
+			)
+			context.Abort()
+			return
+		}
 		claims, err := auth.ValidateToken(
-			strings.Replace(
-				tokenString,
-				"Bearer ",
-				"",
-				1,
-			),
+			authorizationHeaderSplitted[1],
 		)
 		if err != nil {
 			context.AbortWithStatusJSON(

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"github.com/kimoscloud/user-management-service/internal/core/auth"
+	"github.com/kimoscloud/user-management-service/internal/core/model/entity"
 	"github.com/kimoscloud/user-management-service/internal/core/model/request"
 	"github.com/kimoscloud/user-management-service/internal/core/model/response"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
@@ -27,6 +28,34 @@ func (p *AuthenticateUserUseCase) Handler(request request.LoginRequest) (
 	*response.BaseAuthenticationResponse,
 	*errors.AppError,
 ) {
+	result, appError := p.checkIfUserExists(request)
+	if appError != nil {
+		return nil, appError
+	}
+	appError = checkIfUserIsLocked(result, p.logger)
+	if appError != nil {
+		return nil, appError
+	}
+	appError = comparePasswords(result.Hash, request.Password)
+	if appError != nil {
+		return nil, appError
+	}
+	jwt, expirationTime, appError := generateJWT(result, p.logger)
+	if appError != nil {
+		return nil, appError
+	}
+	return &response.BaseAuthenticationResponse{
+		AccessToken: jwt,
+		ExpiresIn:   int(expirationTime.Unix()),
+		TokenType:   "Bearer",
+	}, nil
+
+}
+
+func (p *AuthenticateUserUseCase) checkIfUserExists(request request.LoginRequest) (
+	*entity.User,
+	*errors.AppError,
+) {
 	result, err := p.userRepository.GetByEmail(request.Email)
 	if err != nil {
 		return nil, errors.NewInternalServerError(
@@ -43,40 +72,46 @@ func (p *AuthenticateUserUseCase) Handler(request request.LoginRequest) (
 			errors.ErrorAuthenticatingUser,
 		).AppError
 	}
-	if result.IsLocked || result.BadLoginAttempts >= 5 {
-		p.logger.Error("User is locked", "email", request.Email)
-		return nil, errors.NewUnauthorizedError(
-			"Email or password not exists",
-			"",
-			errors.ErrorAuthenticatingUser,
-		).AppError
-	}
-	if !comparePasswords(result.Hash, request.Password) {
-		return nil, errors.NewUnauthorizedError(
-			"Email or password not exists",
-			"",
-			errors.ErrorAuthenticatingUser,
-		).AppError
-	}
+	return result, nil
+}
+
+func generateJWT(result *entity.User, logger logging.Logger) (
+	string, time.Time,
+	*errors.AppError,
+) {
 	expirationTime := time.Now().Add(60 * time.Minute)
 	jwt, err := auth.GenerateJWT(result.ID, result.Email, expirationTime)
 	if err != nil {
-		p.logger.Error("Error generating JWT", "errors", err.Error())
-		return nil, errors.NewInternalServerError(
+		logger.Error("Error generating JWT", "errors", err.Error())
+		return "", expirationTime, errors.NewInternalServerError(
 			"Error generating JWT",
 			"",
 			errors.ErrorAuthenticatingUser,
 		).AppError
 	}
-	return &response.BaseAuthenticationResponse{
-		AccessToken: jwt,
-		ExpiresIn:   int(expirationTime.Unix()),
-		TokenType:   "Bearer",
-	}, nil
-
+	return jwt, expirationTime, nil
 }
 
-func comparePasswords(hash string, password string) bool {
+func checkIfUserIsLocked(result *entity.User, logger logging.Logger) *errors.AppError {
+	if result.IsLocked || result.BadLoginAttempts >= 5 {
+		logger.Error("User is locked", "email", result.Email)
+		return errors.NewUnauthorizedError(
+			"Email or password not exists",
+			"",
+			errors.ErrorAuthenticatingUser,
+		).AppError
+	}
+	return nil
+}
+
+func comparePasswords(hash string, password string) *errors.AppError {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
+	if err != nil {
+		return errors.NewUnauthorizedError(
+			"Email or password not exists",
+			"",
+			errors.ErrorAuthenticatingUser,
+		).AppError
+	}
+	return nil
 }
