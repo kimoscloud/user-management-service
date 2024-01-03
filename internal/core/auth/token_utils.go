@@ -2,7 +2,7 @@ package auth
 
 import (
 	"errors"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/kimoscloud/user-management-service/internal/core/model/dto"
 	"os"
 	"time"
@@ -16,8 +16,11 @@ func GenerateJWT(id string, email string, expirationTime time.Time) (
 	claims := &dto.JWTClaim{
 		Email: email,
 		ID:    id,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
+		MapClaims: jwt.MapClaims{
+			"exp": expirationTime.Unix(),
+			"iat": time.Now().Local().Unix(),
+			"aud": "kimos.cloud",
+			"iss": "kimos.cloud",
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -45,7 +48,12 @@ func ValidateToken(signedToken string) (claims *dto.JWTClaim, err error) {
 		err = errors.New("couldn't parse claims")
 		return
 	}
-	if (claims.ExpiresAt) < time.Now().Local().Unix() {
+	expirationTime, err := claims.GetExpirationTime()
+	if err != nil {
+		err = errors.New("couldn't parse expiration time")
+		return
+	}
+	if expirationTime.Unix() < time.Now().Local().Unix() {
 		err = errors.New("token expired")
 		return
 	}
