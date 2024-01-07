@@ -1,10 +1,10 @@
-package usecase
+package user
 
 import (
 	"github.com/kimoscloud/user-management-service/internal/core/model/entity/auth"
 	"github.com/kimoscloud/user-management-service/internal/core/model/request"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
-	"github.com/kimoscloud/user-management-service/internal/core/ports/repository"
+	"github.com/kimoscloud/user-management-service/internal/core/ports/repository/user"
 	"github.com/kimoscloud/value-types/errors"
 	"github.com/kimoscloud/value-types/is_valid"
 	"golang.org/x/crypto/bcrypt"
@@ -12,12 +12,12 @@ import (
 )
 
 type CreateUserUseCase struct {
-	userRepository repository.UserRepository
+	userRepository user.Repository
 	logger         logging.Logger
 }
 
 func NewCreateUserUseCase(
-	ur repository.UserRepository,
+	ur user.Repository,
 	logger logging.Logger,
 ) *CreateUserUseCase {
 	return &CreateUserUseCase{userRepository: ur, logger: logger}

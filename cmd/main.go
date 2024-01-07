@@ -4,11 +4,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/kimoscloud/user-management-service/internal/controller"
-	"github.com/kimoscloud/user-management-service/internal/core/usecase"
+	"github.com/kimoscloud/user-management-service/internal/core/usecase/user"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/configuration"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/db"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/logging"
-	"github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres"
+	user2 "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/user"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/server"
 	"log"
 	"os"
@@ -35,15 +35,15 @@ func main() {
 		log.Fatalf("failed to new logger err=%s\n", err.Error())
 	}
 	// Create the UserRepository
-	userRepo := postgres.NewUserRepository(conn)
+	userRepo := user2.NewUserRepository(conn)
 
-	createUserUseCase := usecase.NewCreateUserUseCase(userRepo, logger)
-	authenticateUserUseCase := usecase.NewAuthenticateUserUseCase(
+	createUserUseCase := user.NewCreateUserUseCase(userRepo, logger)
+	authenticateUserUseCase := user.NewAuthenticateUserUseCase(
 		userRepo,
 		logger,
 	)
-	getUserUseCase := usecase.NewGetUserUseCase(userRepo, logger)
-	updateUserProfileUseCase := usecase.NewUpdateUserProfileUseCase(
+	getUserUseCase := user.NewGetUserUseCase(userRepo, logger)
+	updateUserProfileUseCase := user.NewUpdateUserProfileUseCase(
 		userRepo,
 		logger,
 	)
