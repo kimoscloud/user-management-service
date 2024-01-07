@@ -2,7 +2,7 @@ package postgres
 
 import (
 	"errors"
-	"github.com/kimoscloud/user-management-service/internal/core/model/entity"
+	"github.com/kimoscloud/user-management-service/internal/core/model/entity/auth"
 	types "github.com/kimoscloud/value-types/domain"
 	"gorm.io/gorm"
 	"math"
@@ -16,8 +16,8 @@ func NewUserRepository(db *gorm.DB) *UserRepositoryPostgres {
 	return &UserRepositoryPostgres{db: db}
 }
 
-func (repo *UserRepositoryPostgres) GetAll() ([]entity.User, error) {
-	var users []entity.User
+func (repo *UserRepositoryPostgres) GetAll() ([]auth.User, error) {
+	var users []auth.User
 	if err := repo.db.Find(&users).Error; err != nil {
 		return nil, err
 	}
@@ -34,15 +34,15 @@ func calculateTotalPages(totalRows int, pageSize int) int {
 func (repo *UserRepositoryPostgres) GetPage(
 	pageNumber int,
 	pageSize int,
-) (types.Page[entity.User], error) {
+) (types.Page[auth.User], error) {
 	var totalRows int64
-	repo.db.Model(&entity.User{}).Count(&totalRows)
+	repo.db.Model(&auth.User{}).Count(&totalRows)
 	totalPages := calculateTotalPages(int(totalRows), pageSize)
-	var users []entity.User
+	var users []auth.User
 	if err := repo.db.Offset((pageNumber - 1) * pageSize).Limit(pageSize).Find(&users).Error; err != nil {
-		return types.EmptyPage[entity.User](), err
+		return types.EmptyPage[auth.User](), err
 	}
-	pageBuilder := new(types.PageBuilder[entity.User])
+	pageBuilder := new(types.PageBuilder[auth.User])
 	return pageBuilder.SetItems(users).
 		SetTotal(int(totalRows)).
 		SetPageSize(pageSize).
@@ -51,9 +51,9 @@ func (repo *UserRepositoryPostgres) GetPage(
 		Build(), nil
 }
 
-func (repo *UserRepositoryPostgres) GetByID(id string) (*entity.User, error) {
-	var user entity.User
-	result := repo.db.Model(&entity.User{}).Where("id = ?", id).First(&user)
+func (repo *UserRepositoryPostgres) GetByID(id string) (*auth.User, error) {
+	var user auth.User
+	result := repo.db.Model(&auth.User{}).Where("id = ?", id).First(&user)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -64,11 +64,11 @@ func (repo *UserRepositoryPostgres) GetByID(id string) (*entity.User, error) {
 }
 
 func (repo *UserRepositoryPostgres) GetByEmail(email string) (
-	*entity.User,
+	*auth.User,
 	error,
 ) {
-	var user entity.User
-	result := repo.db.Model(&entity.User{}).Where(
+	var user auth.User
+	result := repo.db.Model(&auth.User{}).Where(
 		"email = ?",
 		email,
 	).First(&user)
@@ -82,8 +82,8 @@ func (repo *UserRepositoryPostgres) GetByEmail(email string) (
 }
 
 // TODO add context here
-func (repo *UserRepositoryPostgres) Create(user *entity.User) (
-	*entity.User,
+func (repo *UserRepositoryPostgres) Create(user *auth.User) (
+	*auth.User,
 	error,
 ) {
 	result := repo.db.Create(user)
@@ -93,8 +93,8 @@ func (repo *UserRepositoryPostgres) Create(user *entity.User) (
 	return repo.GetByID(user.ID)
 }
 
-func (repo *UserRepositoryPostgres) Update(user *entity.User) (
-	*entity.User,
+func (repo *UserRepositoryPostgres) Update(user *auth.User) (
+	*auth.User,
 	error,
 ) {
 	result := repo.db.Updates(user)

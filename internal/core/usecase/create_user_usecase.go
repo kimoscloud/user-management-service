@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"github.com/kimoscloud/user-management-service/internal/core/model/entity"
+	"github.com/kimoscloud/user-management-service/internal/core/model/entity/auth"
 	"github.com/kimoscloud/user-management-service/internal/core/model/request"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/repository"
@@ -24,7 +24,7 @@ func NewCreateUserUseCase(
 }
 
 func (p *CreateUserUseCase) Handler(req *request.SignUpRequest) (
-	*entity.User,
+	*auth.User,
 	*errors.AppError,
 ) {
 	appError := validateSignUpRequest(req)
@@ -57,7 +57,7 @@ func (p *CreateUserUseCase) Handler(req *request.SignUpRequest) (
 			errors.ErrorCreatingUser,
 		).AppError
 	}
-	user = &entity.User{
+	user = &auth.User{
 		Email:                      req.Email,
 		Hash:                       hashedPassword,
 		BadLoginAttempts:           0,

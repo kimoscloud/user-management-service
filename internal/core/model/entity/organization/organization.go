@@ -1,4 +1,4 @@
-package entity
+package organization
 
 import (
 	"gorm.io/gorm"
@@ -6,6 +6,7 @@ import (
 )
 
 type Organization struct {
+	gorm.Model
 	ID                    string `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
 	Name                  string `gorm:"type:varchar(255)"`
 	CreatedBy             string `gorm:"type:uuid;not null"`
@@ -21,7 +22,11 @@ type Organization struct {
 	SubscriptionID        string         `gorm:"type:varchar(255)"`
 	Status                string         `gorm:"type:varchar(255)"`
 	Timezone              string         `gorm:"type:varchar(255)"`
-	CreatedAt             time.Time      `gorm:"not null"`
-	UpdatedAt             time.Time      `gorm:"not null"`
+	CreatedAt             time.Time      `gorm:"column:created_at;not null"`
+	UpdatedAt             time.Time      `gorm:"column:updated_at;not null"`
 	DeletedAt             gorm.DeletedAt `gorm:"column:deleted_at;index"`
+}
+
+func (Organization) TableName() string {
+	return "Organizations"
 }
