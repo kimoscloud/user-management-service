@@ -89,6 +89,7 @@ func (u UserController) updateProfile(c *gin.Context) {
 	userId := c.GetString("kimosUserId")
 	updateProfileRequest, err := u.parseUpdateProfileRequest(c)
 	if err != nil {
+		//TODO wrapp error
 		c.AbortWithStatusJSON(
 			http.StatusBadRequest, &gin.H{
 				"message": "Invalid request",
