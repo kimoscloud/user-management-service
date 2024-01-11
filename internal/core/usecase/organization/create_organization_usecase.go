@@ -3,6 +3,7 @@ package organization
 import (
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/repository/organization"
+	"github.com/kimoscloud/value-types/errors"
 )
 
 type CreateOrganizationUseCase struct {
@@ -20,8 +21,8 @@ func NewCreateOrganizationUseCase(
 	}
 }
 
-func (cu CreateOrganizationUseCase) Hadler(userId string, request CreateOrganizationRequest) (*CreateOrganizationResponse, *CreateOrganizationError) {
-	organization, err := cu.organizationRepository.CreateOrganization(userId, request.Name)
+func (cu CreateOrganizationUseCase) Hadler(userId string, request CreateOrganizationRequest) (*CreateOrganizationResponse, *errors.AppError) {
+	organization, err := cu.organizationRepository.Create()
 	if err != nil {
 		cu.logger.Error(err)
 		return nil, &CreateOrganizationError{

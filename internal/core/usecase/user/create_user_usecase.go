@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/kimoscloud/user-management-service/internal/core/model/entity/auth"
-	"github.com/kimoscloud/user-management-service/internal/core/model/request"
+	auth2 "github.com/kimoscloud/user-management-service/internal/core/model/request/auth"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/repository/user"
 	"github.com/kimoscloud/value-types/errors"
@@ -23,7 +23,7 @@ func NewCreateUserUseCase(
 	return &CreateUserUseCase{userRepository: ur, logger: logger}
 }
 
-func (p *CreateUserUseCase) Handler(req *request.SignUpRequest) (
+func (p *CreateUserUseCase) Handler(req *auth2.SignUpRequest) (
 	*auth.User,
 	*errors.AppError,
 ) {
@@ -88,7 +88,7 @@ func hashAndSalt(pwd string) (string, error) {
 	return string(hash), nil
 }
 
-func validateSignUpRequest(signUpRequest *request.SignUpRequest) *errors.AppError {
+func validateSignUpRequest(signUpRequest *auth2.SignUpRequest) *errors.AppError {
 	if !signUpRequest.AcceptTermsAndConditions {
 		return errors.NewBadRequestError(
 			"User must accept terms and conditions",

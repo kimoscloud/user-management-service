@@ -2,7 +2,7 @@ package user
 
 import (
 	errors2 "github.com/kimoscloud/user-management-service/internal/core/errors"
-	"github.com/kimoscloud/user-management-service/internal/core/model/request"
+	"github.com/kimoscloud/user-management-service/internal/core/model/request/auth"
 	"github.com/kimoscloud/user-management-service/internal/core/model/response"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/repository/user"
@@ -23,7 +23,7 @@ func NewUpdateUserProfileUseCase(
 
 func (p *UpdateUserProfileUseCase) Handler(
 	id string,
-	newInformation *request.UpdateProfileRequest,
+	newInformation *auth.UpdateProfileRequest,
 ) (*response.UserLightDTO, *errors.AppError) {
 	result, err := p.userRepository.GetByID(id)
 	if err != nil {

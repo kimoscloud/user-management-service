@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/kimoscloud/user-management-service/internal/core/auth"
-	"github.com/kimoscloud/user-management-service/internal/core/model/request"
+	auth2 "github.com/kimoscloud/user-management-service/internal/core/model/request/auth"
 	"github.com/kimoscloud/user-management-service/internal/core/model/response"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/repository/user"
@@ -23,7 +23,7 @@ func NewAuthenticateUserUseCase(
 	return &AuthenticateUserUseCase{userRepository: ur, logger: logger}
 }
 
-func (p *AuthenticateUserUseCase) Handler(request request.LoginRequest) (
+func (p *AuthenticateUserUseCase) Handler(request auth2.LoginRequest) (
 	*response.BaseAuthenticationResponse,
 	*errors.AppError,
 ) {

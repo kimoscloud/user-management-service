@@ -2,7 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/kimoscloud/user-management-service/internal/core/model/request"
+	"github.com/kimoscloud/user-management-service/internal/core/model/request/auth"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	"github.com/kimoscloud/user-management-service/internal/core/usecase/user"
 	"github.com/kimoscloud/user-management-service/internal/middleware"
@@ -119,10 +119,10 @@ func (u UserController) me(c *gin.Context) {
 }
 
 func (u UserController) parseSignUpRequest(ctx *gin.Context) (
-	*request.SignUpRequest,
+	*auth.SignUpRequest,
 	error,
 ) {
-	var req request.SignUpRequest
+	var req auth.SignUpRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		return nil, err
 	}
@@ -130,10 +130,10 @@ func (u UserController) parseSignUpRequest(ctx *gin.Context) (
 }
 
 func (u UserController) parseLoginRequest(ctx *gin.Context) (
-	*request.LoginRequest,
+	*auth.LoginRequest,
 	error,
 ) {
-	var req request.LoginRequest
+	var req auth.LoginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		return nil, err
 	}
@@ -141,10 +141,10 @@ func (u UserController) parseLoginRequest(ctx *gin.Context) (
 }
 
 func (u UserController) parseUpdateProfileRequest(ctx *gin.Context) (
-	*request.UpdateProfileRequest,
+	*auth.UpdateProfileRequest,
 	error,
 ) {
-	var req request.UpdateProfileRequest
+	var req auth.UpdateProfileRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		return nil, err
 	}
