@@ -2,22 +2,23 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	organizationRequest "github.com/kimoscloud/user-management-service/internal/core/model/request/organization"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
-	"github.com/kimoscloud/user-management-service/internal/core/usecase/organization"
+	usecase "github.com/kimoscloud/user-management-service/internal/core/usecase/organization"
 	"github.com/kimoscloud/user-management-service/internal/middleware"
 	"net/http"
 )
 
 type OrganizationController struct {
 	gin                       *gin.Engine
-	createOrganizationUseCase *organization.CreateOrganizationUseCase
+	createOrganizationUseCase *usecase.CreateOrganizationUseCase
 	logger                    logging.Logger
 }
 
 func NewOrganizationController(
 	gin *gin.Engine,
 	logger logging.Logger,
-	createOrganizationUseCase *organization.CreateOrganizationUseCase,
+	createOrganizationUseCase *usecase.CreateOrganizationUseCase,
 ) OrganizationController {
 	return OrganizationController{
 		gin:                       gin,
@@ -51,8 +52,11 @@ func (oc OrganizationController) createOrganization(c *gin.Context) {
 	c.JSON(http.StatusCreated, result)
 }
 
-func (oc OrganizationController) parseCreateOrganizationRequest(ctx *gin.Context) (*organization.CreateOrganizationRequest, error) {
-	var request organization.CreateOrganizationRequest
+func (oc OrganizationController) parseCreateOrganizationRequest(ctx *gin.Context) (
+	*organizationRequest.CreateOrganizationRequest,
+	error,
+) {
+	var request organizationRequest.CreateOrganizationRequest
 	err := ctx.ShouldBindJSON(&request)
 	if err != nil {
 		return nil, err

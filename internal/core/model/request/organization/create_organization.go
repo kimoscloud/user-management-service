@@ -1,6 +1,5 @@
 package organization
 
-type CreateOrganizationRequest {
+type CreateOrganizationRequest struct {
 	Name string `json:"name"`
-	
 }

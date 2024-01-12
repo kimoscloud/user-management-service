@@ -4,10 +4,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/kimoscloud/user-management-service/internal/controller"
+	"github.com/kimoscloud/user-management-service/internal/core/usecase/organization"
 	"github.com/kimoscloud/user-management-service/internal/core/usecase/user"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/configuration"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/db"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/logging"
+	organizationRepository "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/organization"
 	user2 "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/user"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/server"
 	"log"
@@ -36,6 +38,7 @@ func main() {
 	}
 	// Create the UserRepository
 	userRepo := user2.NewUserRepository(conn)
+	organizationRepository := organizationRepository.NewOrganizationRepository(conn)
 
 	createUserUseCase := user.NewCreateUserUseCase(userRepo, logger)
 	authenticateUserUseCase := user.NewAuthenticateUserUseCase(
@@ -54,6 +57,17 @@ func main() {
 		authenticateUserUseCase,
 		getUserUseCase,
 		updateUserProfileUseCase,
+	)
+
+	createOrganizationUseCase := organization.NewCreateOrganizationUseCase(
+		organizationRepository,
+		logger,
+	)
+
+	organizationController := controller.NewOrganizationController(
+		instance,
+		logger,
+		createOrganizationUseCase,
 	)
 
 	userController.InitRouter()
