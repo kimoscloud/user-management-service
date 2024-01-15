@@ -5,7 +5,6 @@ import (
 	"github.com/kimoscloud/user-management-service/internal/core/model/entity/auth"
 	types "github.com/kimoscloud/value-types/domain"
 	"gorm.io/gorm"
-	"math"
 )
 
 type UserRepositoryPostgres struct {
@@ -24,20 +23,12 @@ func (repo *UserRepositoryPostgres) GetAll() ([]auth.User, error) {
 	return users, nil
 }
 
-func calculateTotalPages(totalRows int, pageSize int) int {
-	if pageSize == 0 {
-		return 0
-	}
-	return int(math.Ceil(float64(totalRows) / float64(pageSize)))
-}
-
 func (repo *UserRepositoryPostgres) GetPage(
 	pageNumber int,
 	pageSize int,
 ) (types.Page[auth.User], error) {
 	var totalRows int64
 	repo.db.Model(&auth.User{}).Count(&totalRows)
-	totalPages := calculateTotalPages(int(totalRows), pageSize)
 	var users []auth.User
 	if err := repo.db.Offset((pageNumber - 1) * pageSize).Limit(pageSize).Find(&users).Error; err != nil {
 		return types.EmptyPage[auth.User](), err
@@ -47,7 +38,6 @@ func (repo *UserRepositoryPostgres) GetPage(
 		SetTotal(int(totalRows)).
 		SetPageSize(pageSize).
 		SetPageNumber(pageNumber).
-		SetTotalPages(totalPages).
 		Build(), nil
 }
 

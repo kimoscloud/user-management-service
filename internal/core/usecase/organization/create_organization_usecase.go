@@ -2,7 +2,7 @@ package organization
 
 import (
 	"github.com/kimoscloud/user-management-service/internal/core/model/entity/organization"
-	request "github.com/kimoscloud/user-management-service/internal/core/model/response/organization"
+	request "github.com/kimoscloud/user-management-service/internal/core/model/request/organization"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	repository "github.com/kimoscloud/user-management-service/internal/core/ports/repository/organization"
 	"github.com/kimoscloud/value-types/errors"
@@ -16,19 +16,27 @@ type CreateOrganizationUseCase struct {
 func NewCreateOrganizationUseCase(
 	organizationRepository repository.Repository,
 	logger logging.Logger,
-) CreateOrganizationUseCase {
-	return CreateOrganizationUseCase{
+) *CreateOrganizationUseCase {
+	return &CreateOrganizationUseCase{
 		organizationRepository: organizationRepository,
 		logger:                 logger,
 	}
 }
 
-func (cu CreateOrganizationUseCase) Handler(userId string, request request.CreateOrganizationRequest) (*organization.Organization, *errors.AppError) {
-	organizationResult, err := cu.organizationRepository.Create(&organization.Organization{
-		Name:      request.Name,
-		BillingEmail: request.BillingEmail
-		CreatedBy: userId,
-	})
+func (cu CreateOrganizationUseCase) Handler(
+	userId string,
+	request *request.CreateOrganizationRequest,
+) (*organization.Organization, *errors.AppError) {
+	tx := cu.organizationRepository.BeginTransaction()
+	defer tx.Rollback()
+
+	organizationResult, err := cu.organizationRepository.Create(
+		&organization.Organization{
+			Name:         request.Name,
+			BillingEmail: request.BillingEmail,
+			CreatedBy:    userId,
+		},
+	)
 	if err != nil {
 		return nil, errors.NewInternalServerError(
 			"Error getting user by email",

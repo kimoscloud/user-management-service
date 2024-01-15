@@ -38,7 +38,7 @@ func main() {
 	}
 	// Create the UserRepository
 	userRepo := user2.NewUserRepository(conn)
-	organizationRepository := organizationRepository.NewOrganizationRepository(conn)
+	orgRepo := organizationRepository.NewOrganizationRepository(conn)
 
 	createUserUseCase := user.NewCreateUserUseCase(userRepo, logger)
 	authenticateUserUseCase := user.NewAuthenticateUserUseCase(
@@ -60,7 +60,7 @@ func main() {
 	)
 
 	createOrganizationUseCase := organization.NewCreateOrganizationUseCase(
-		organizationRepository,
+		orgRepo,
 		logger,
 	)
 
@@ -71,6 +71,7 @@ func main() {
 	)
 
 	userController.InitRouter()
+	organizationController.InitRouter()
 	httpServer := server.NewHttpServer(
 		instance,
 		configuration.GetHttpServerConfig(),
