@@ -50,3 +50,37 @@ func (repo *RepositoryPostgres) GetPage(
 		SetTotalPages(totalPages).
 		Build(), nil
 }
+
+func (repo *RepositoryPostgres) GetByID(id string) (*organization.Organization, error) {
+	var organization organization.Organization
+	if err := repo.db.Where("id = ?", id).First(&organization).Error; err != nil {
+		return nil, err
+	}
+	return &organization, nil
+}
+func (repo *RepositoryPostgres) GetAllByUserId(userId string) ([]organization.Organization, error) {
+	var organizations []organization.Organization
+	if err := repo.db.Joins("inner join UserOrganization on organization.id = UserOrganization.organization_id").Find(&organizations).Error; err != nil {
+		return nil, err
+	}
+	return organizations, nil
+
+}
+func (repo *RepositoryPostgres) Create(organization *organization.Organization) (*organization.Organization, error) {
+	if err := repo.db.Create(&organization).Error; err != nil {
+		return nil, err
+	}
+	return organization, nil
+}
+func (repo *RepositoryPostgres) Update(organization *organization.Organization) (*organization.Organization, error) {
+	if err := repo.db.Save(&organization).Error; err != nil {
+		return nil, err
+	}
+	return organization, nil
+}
+func (repo *RepositoryPostgres) Delete(id string) error {
+	if err := repo.db.Where("id = ?", id).Delete(&organization.Organization{}).Error; err != nil {
+		return err
+	}
+	return nil
+}

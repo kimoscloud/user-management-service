@@ -44,7 +44,7 @@ func (oc OrganizationController) createOrganization(c *gin.Context) {
 		)
 		return
 	}
-	result, appError := oc.createOrganizationUseCase.Hadler(userId, *organization)
+	result, appError := oc.createOrganizationUseCase.Handler(userId, *organization)
 	if appError != nil {
 		c.AbortWithStatusJSON(appError.HTTPStatus, appError)
 		return

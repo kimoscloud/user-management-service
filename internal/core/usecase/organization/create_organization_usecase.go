@@ -1,18 +1,20 @@
 package organization
 
 import (
+	"github.com/kimoscloud/user-management-service/internal/core/model/entity/organization"
+	request "github.com/kimoscloud/user-management-service/internal/core/model/response/organization"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
-	"github.com/kimoscloud/user-management-service/internal/core/ports/repository/organization"
+	repository "github.com/kimoscloud/user-management-service/internal/core/ports/repository/organization"
 	"github.com/kimoscloud/value-types/errors"
 )
 
 type CreateOrganizationUseCase struct {
-	organizationRepository organization.Repository
+	organizationRepository repository.Repository
 	logger                 logging.Logger
 }
 
 func NewCreateOrganizationUseCase(
-	organizationRepository organization.Repository,
+	organizationRepository repository.Repository,
 	logger logging.Logger,
 ) CreateOrganizationUseCase {
 	return CreateOrganizationUseCase{
@@ -21,17 +23,18 @@ func NewCreateOrganizationUseCase(
 	}
 }
 
-func (cu CreateOrganizationUseCase) Hadler(userId string, request CreateOrganizationRequest) (*CreateOrganizationResponse, *errors.AppError) {
-	organization, err := cu.organizationRepository.Create()
+func (cu CreateOrganizationUseCase) Handler(userId string, request request.CreateOrganizationRequest) (*organization.Organization, *errors.AppError) {
+	organizationResult, err := cu.organizationRepository.Create(&organization.Organization{
+		Name:      request.Name,
+		BillingEmail: request.BillingEmail
+		CreatedBy: userId,
+	})
 	if err != nil {
-		cu.logger.Error(err)
-		return nil, &CreateOrganizationError{
-			HTTPStatus: 500,
-			Message:    "Internal server error",
-		}
+		return nil, errors.NewInternalServerError(
+			"Error getting user by email",
+			"",
+			errors.ErrorCreatingUser,
+		).AppError
 	}
-	return &CreateOrganizationResponse{
-		Id:   organization.Id,
-		Name: organization.Name,
-	}, nil
+	return organizationResult, nil
 }
