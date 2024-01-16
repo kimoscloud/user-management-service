@@ -66,7 +66,7 @@ func (cu CreateOrganizationUseCase) Handler(
 		RoleID:         domain.ORGANIZATION_ADMIN,
 		//TODO send email to user with different template to the invite
 		InvitedAt: time.Now(),
-	})
+	}, tx)
 	if err != nil {
 		tx.Rollback()
 		return nil, errors.NewInternalServerError(
