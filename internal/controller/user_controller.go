@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/kimoscloud/user-management-service/internal/core/model/request"
 	"github.com/kimoscloud/user-management-service/internal/core/model/request/auth"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	"github.com/kimoscloud/user-management-service/internal/core/usecase/user"
@@ -47,6 +48,7 @@ func (u UserController) InitRouter() {
 	{
 		secured.GET("/me", u.me)
 		secured.PUT("/me", u.updateProfile)
+		secured.POST("/password", u.changePassword)
 	}
 }
 
@@ -67,6 +69,30 @@ func (u UserController) login(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, result)
 	return
+}
+
+func (u UserController) changePassword(c *gin.Context) {
+	userId := c.GetString("kimosUserId")
+	changePasswordRequest, err := u.parseChangePasswordRequest(c)
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusBadRequest, &gin.H{
+				"message": "Invalid request",
+			},
+		)
+		return
+	}
+	changePasswordRequest.IsValid()
+	appError := u.changePasswordUseCase.Handle(userId, changePasswordRequest)
+	if appError != nil {
+		c.AbortWithStatusJSON(appError.HTTPStatus, appError)
+		return
+	}
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status": "success",
+		},
+	)
 }
 
 func (u UserController) signUp(c *gin.Context) {
@@ -149,6 +175,17 @@ func (u UserController) parseUpdateProfileRequest(ctx *gin.Context) (
 ) {
 	var req auth.UpdateProfileRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
+		return nil, err
+	}
+	return &req, nil
+}
+
+func (u UserController) parseChangePasswordRequest(c *gin.Context) (
+	*request.ChangePasswordRequest,
+	error,
+) {
+	var req request.ChangePasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		return nil, err
 	}
 	return &req, nil
