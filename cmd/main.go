@@ -54,6 +54,11 @@ func main() {
 		userRepo,
 		logger,
 	)
+
+	changePasswordUseCase := user.NewChangePasswordUseCase(
+		userRepo,
+		logger)
+
 	userController := controller.NewUserController(
 		instance,
 		logger,
@@ -61,6 +66,7 @@ func main() {
 		authenticateUserUseCase,
 		getUserUseCase,
 		updateUserProfileUseCase,
+		changePasswordUseCase,
 	)
 
 	createOrganizationUseCase := organization.NewCreateOrganizationUseCase(

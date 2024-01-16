@@ -15,6 +15,7 @@ type UserController struct {
 	authenticateUserUseCase  *user.AuthenticateUserUseCase
 	getUserUseCase           *user.GetUserUseCase
 	updateUserProfileUseCase *user.UpdateUserProfileUseCase
+	changePasswordUseCase    *user.ChangePasswordUseCase
 	logger                   logging.Logger
 }
 
@@ -25,6 +26,7 @@ func NewUserController(
 	authenticateUserUseCase *user.AuthenticateUserUseCase,
 	getUserUseCase *user.GetUserUseCase,
 	updateUserProfileUseCase *user.UpdateUserProfileUseCase,
+	changePasswordUseCase *user.ChangePasswordUseCase,
 ) UserController {
 	return UserController{
 		gin:                      gin,
@@ -33,6 +35,7 @@ func NewUserController(
 		authenticateUserUseCase:  authenticateUserUseCase,
 		getUserUseCase:           getUserUseCase,
 		updateUserProfileUseCase: updateUserProfileUseCase,
+		changePasswordUseCase:    changePasswordUseCase,
 	}
 }
 

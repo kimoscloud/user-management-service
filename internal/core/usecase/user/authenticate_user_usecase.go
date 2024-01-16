@@ -6,8 +6,8 @@ import (
 	"github.com/kimoscloud/user-management-service/internal/core/model/response"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/repository/user"
+	"github.com/kimoscloud/user-management-service/internal/core/utils"
 	"github.com/kimoscloud/value-types/errors"
-	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
@@ -51,7 +51,7 @@ func (p *AuthenticateUserUseCase) Handler(request auth2.LoginRequest) (
 			errors.ErrorAuthenticatingUser,
 		).AppError
 	}
-	if !comparePasswords(result.Hash, request.Password) {
+	if !utils.ComparePasswords(result.Hash, request.Password) {
 		return nil, errors.NewUnauthorizedError(
 			"Email or password not exists",
 			"",
@@ -74,9 +74,4 @@ func (p *AuthenticateUserUseCase) Handler(request auth2.LoginRequest) (
 		TokenType:   "Bearer",
 	}, nil
 
-}
-
-func comparePasswords(hash string, password string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
 }
