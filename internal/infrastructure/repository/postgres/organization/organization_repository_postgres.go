@@ -55,11 +55,11 @@ func (repo *RepositoryPostgres) GetAllByUserId(userId string) ([]organization.Or
 	return organizations, nil
 
 }
-func (repo *RepositoryPostgres) Create(organization *organization.Organization) (
-	*organization.Organization,
-	error,
-) {
-	if err := repo.db.Create(&organization).Error; err != nil {
+func (repo *RepositoryPostgres) Create(organization *organization.Organization, tx *gorm.DB) (*organization.Organization, error) {
+	if tx == nil {
+		tx = repo.db
+	}
+	if err := tx.Create(&organization).Error; err != nil {
 		return nil, err
 	}
 	return organization, nil

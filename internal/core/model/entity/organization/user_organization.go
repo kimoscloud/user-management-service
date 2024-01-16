@@ -18,3 +18,7 @@ type UserOrganization struct {
 	UpdatedAt      time.Time      `gorm:"column:updated_at;not null"`
 	DeletedAt      gorm.DeletedAt `gorm:"column:deleted_at;index"`
 }
+
+func (UserOrganization) TableName() string {
+	return "Organization_Users"
+}

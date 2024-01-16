@@ -10,6 +10,7 @@ import (
 	"github.com/kimoscloud/user-management-service/internal/core/utils"
 	"github.com/kimoscloud/value-types/domain"
 	"github.com/kimoscloud/value-types/errors"
+	"time"
 )
 
 type CreateOrganizationUseCase struct {
@@ -47,6 +48,7 @@ func (cu CreateOrganizationUseCase) Handler(
 			CreatedBy:    userId,
 			Slug:         utils.CreateSlug(request.Name),
 		},
+		tx,
 	)
 
 	if err != nil {
@@ -57,21 +59,13 @@ func (cu CreateOrganizationUseCase) Handler(
 			errors.ErrorCreatingUser,
 		).AppError
 	}
-	roleResult, err := cu.roleRepo.GetByID(domain.ORGANIZATION_ADMIN)
-	if err != nil {
-		tx.Rollback()
-		return nil, errors.NewInternalServerError(
-			"Error getting role for org admin user",
-			"",
-			//TODO add it to errors code
-			errors.ErrorCreatingUser,
-		).AppError
-	}
 
 	_, err = cu.userOrganizationRepo.Create(&organization.UserOrganization{
 		OrganizationID: organizationResult.ID,
 		UserID:         userId,
-		Role:           *roleResult,
+		RoleID:         domain.ORGANIZATION_ADMIN,
+		//TODO send email to user with different template to the invite
+		InvitedAt: time.Now(),
 	})
 	if err != nil {
 		tx.Rollback()
