@@ -1,4 +1,4 @@
-package entity
+package auth
 
 import (
 	"gorm.io/gorm"
@@ -6,6 +6,7 @@ import (
 )
 
 type User struct {
+	gorm.Model
 	ID                         string         `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
 	FirstName                  string         `gorm:"column:first_name"`
 	LastName                   string         `gorm:"column:last_name"`
@@ -16,13 +17,13 @@ type User struct {
 	Timezone                   string         `gorm:"column:timezone"`
 	Email                      string         `gorm:"column:email;uniqueIndex"`
 	LastLogin                  time.Time      `gorm:"column:last_login"`
-	CreatedAt                  time.Time      `gorm:"column:created_at"`
-	UpdatedAt                  time.Time      `gorm:"column:updated_at"`
 	EmailVerifiedAt            time.Time      `gorm:"column:email_verified_at"`
-	DeletedAt                  gorm.DeletedAt `gorm:"column:deleted_at;index"`
 	BadLoginAttempts           int            `gorm:"column:bad_attempts"`
 	IsLocked                   bool           `gorm:"column:is_locked"`
 	Hash                       string         `gorm:"column:hash"`
+	CreatedAt                  time.Time      `gorm:"column:created_at;not null"`
+	UpdatedAt                  time.Time      `gorm:"column:updated_at;not null"`
+	DeletedAt                  gorm.DeletedAt `gorm:"column:deleted_at;index"`
 }
 
 func (User) TableName() string {

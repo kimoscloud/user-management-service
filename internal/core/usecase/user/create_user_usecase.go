@@ -1,30 +1,30 @@
-package usecase
+package user
 
 import (
-	"github.com/kimoscloud/user-management-service/internal/core/auth"
-	"github.com/kimoscloud/user-management-service/internal/core/model/entity"
-	"github.com/kimoscloud/user-management-service/internal/core/model/request"
+	"github.com/kimoscloud/user-management-service/internal/core/model/entity/auth"
+	auth2 "github.com/kimoscloud/user-management-service/internal/core/model/request/auth"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
-	"github.com/kimoscloud/user-management-service/internal/core/ports/repository"
+	"github.com/kimoscloud/user-management-service/internal/core/ports/repository/user"
 	"github.com/kimoscloud/value-types/errors"
 	"github.com/kimoscloud/value-types/is_valid"
+	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
 type CreateUserUseCase struct {
-	userRepository repository.UserRepository
+	userRepository user.Repository
 	logger         logging.Logger
 }
 
 func NewCreateUserUseCase(
-	ur repository.UserRepository,
+	ur user.Repository,
 	logger logging.Logger,
 ) *CreateUserUseCase {
 	return &CreateUserUseCase{userRepository: ur, logger: logger}
 }
 
-func (p *CreateUserUseCase) Handler(req *request.SignUpRequest) (
-	*entity.User,
+func (p *CreateUserUseCase) Handler(req *auth2.SignUpRequest) (
+	*auth.User,
 	*errors.AppError,
 ) {
 	appError := validateSignUpRequest(req)
@@ -48,7 +48,7 @@ func (p *CreateUserUseCase) Handler(req *request.SignUpRequest) (
 		).AppError
 	}
 
-	hashedPassword, err := auth.HashAndSalt(req.Password)
+	hashedPassword, err := hashAndSalt(req.Password)
 	if err != nil {
 		p.logger.Error("Error hashing password", "errors", err.Error())
 		return nil, errors.NewInternalServerError(
@@ -57,7 +57,7 @@ func (p *CreateUserUseCase) Handler(req *request.SignUpRequest) (
 			errors.ErrorCreatingUser,
 		).AppError
 	}
-	user = &entity.User{
+	user = &auth.User{
 		Email:                      req.Email,
 		Hash:                       hashedPassword,
 		BadLoginAttempts:           0,
@@ -79,7 +79,16 @@ func (p *CreateUserUseCase) Handler(req *request.SignUpRequest) (
 	return createUserResult, nil
 }
 
-func validateSignUpRequest(signUpRequest *request.SignUpRequest) *errors.AppError {
+func hashAndSalt(pwd string) (string, error) {
+	bytePassword := []byte(pwd)
+	hash, err := bcrypt.GenerateFromPassword(bytePassword, 10)
+	if err != nil {
+		return "", err
+	}
+	return string(hash), nil
+}
+
+func validateSignUpRequest(signUpRequest *auth2.SignUpRequest) *errors.AppError {
 	if !signUpRequest.AcceptTermsAndConditions {
 		return errors.NewBadRequestError(
 			"User must accept terms and conditions",

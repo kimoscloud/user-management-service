@@ -3,29 +3,31 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/kimoscloud/user-management-service/internal/core/model/request"
+	"github.com/kimoscloud/user-management-service/internal/core/model/request/auth"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
-	"github.com/kimoscloud/user-management-service/internal/core/usecase"
+	"github.com/kimoscloud/user-management-service/internal/core/usecase/user"
 	"github.com/kimoscloud/user-management-service/internal/middleware"
 	"net/http"
 )
 
 type UserController struct {
 	gin                      *gin.Engine
-	createUserUseCase        *usecase.CreateUserUseCase
-	authenticateUserUseCase  *usecase.AuthenticateUserUseCase
-	getUserUseCase           *usecase.GetUserUseCase
-	updateUserProfileUseCase *usecase.UpdateUserProfileUseCase
-	changePasswordUsecase    *usecase.ChangePasswordUsecase
+	createUserUseCase        *user.CreateUserUseCase
+	authenticateUserUseCase  *user.AuthenticateUserUseCase
+	getUserUseCase           *user.GetUserUseCase
+	updateUserProfileUseCase *user.UpdateUserProfileUseCase
+	changePasswordUseCase    *user.ChangePasswordUseCase
 	logger                   logging.Logger
 }
 
 func NewUserController(
 	gin *gin.Engine,
 	logger logging.Logger,
-	createUserUseCase *usecase.CreateUserUseCase,
-	authenticateUserUseCase *usecase.AuthenticateUserUseCase,
-	getUserUseCase *usecase.GetUserUseCase,
-	updateUserProfileUseCase *usecase.UpdateUserProfileUseCase,
+	createUserUseCase *user.CreateUserUseCase,
+	authenticateUserUseCase *user.AuthenticateUserUseCase,
+	getUserUseCase *user.GetUserUseCase,
+	updateUserProfileUseCase *user.UpdateUserProfileUseCase,
+	changePasswordUseCase *user.ChangePasswordUseCase,
 ) UserController {
 	return UserController{
 		gin:                      gin,
@@ -34,6 +36,7 @@ func NewUserController(
 		authenticateUserUseCase:  authenticateUserUseCase,
 		getUserUseCase:           getUserUseCase,
 		updateUserProfileUseCase: updateUserProfileUseCase,
+		changePasswordUseCase:    changePasswordUseCase,
 	}
 }
 
@@ -41,18 +44,12 @@ func (u UserController) InitRouter() {
 	api := u.gin.Group("/api/v1/user")
 	api.POST("/signup", u.signUp)
 	api.POST("/login", u.login)
-
 	secured := api.Group("", middleware.Auth())
 	{
 		secured.GET("/me", u.me)
 		secured.PUT("/me", u.updateProfile)
-		secured.POST("/validate-token", u.validateToken)
 		secured.POST("/password", u.changePassword)
 	}
-}
-
-func (u UserController) validateToken(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{})
 }
 
 func (u UserController) login(c *gin.Context) {
@@ -72,6 +69,30 @@ func (u UserController) login(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, result)
 	return
+}
+
+func (u UserController) changePassword(c *gin.Context) {
+	userId := c.GetString("kimosUserId")
+	changePasswordRequest, err := u.parseChangePasswordRequest(c)
+	if err != nil {
+		c.AbortWithStatusJSON(
+			http.StatusBadRequest, &gin.H{
+				"message": "Invalid request",
+			},
+		)
+		return
+	}
+	changePasswordRequest.IsValid()
+	appError := u.changePasswordUseCase.Handle(userId, changePasswordRequest)
+	if appError != nil {
+		c.AbortWithStatusJSON(appError.HTTPStatus, appError)
+		return
+	}
+	c.JSON(
+		http.StatusOK, gin.H{
+			"status": "success",
+		},
+	)
 }
 
 func (u UserController) signUp(c *gin.Context) {
@@ -97,6 +118,7 @@ func (u UserController) updateProfile(c *gin.Context) {
 	userId := c.GetString("kimosUserId")
 	updateProfileRequest, err := u.parseUpdateProfileRequest(c)
 	if err != nil {
+		//TODO wrapp error
 		c.AbortWithStatusJSON(
 			http.StatusBadRequest, &gin.H{
 				"message": "Invalid request",
@@ -125,35 +147,11 @@ func (u UserController) me(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-func (u UserController) changePassword(c *gin.Context) {
-	userId := c.GetString("kimosUserId")
-	changePasswordRequest, err := u.parseChangePasswordRequest(c)
-	if err != nil {
-		c.AbortWithStatusJSON(
-			http.StatusBadRequest, &gin.H{
-				"message": "Invalid request",
-			},
-		)
-		return
-	}
-	changePasswordRequest.IsValid()
-	appError := u.changePasswordUsecase.Handle(userId, changePasswordRequest)
-	if appError != nil {
-		c.AbortWithStatusJSON(appError.HTTPStatus, appError)
-		return
-	}
-	c.JSON(
-		http.StatusOK, gin.H{
-			"status": "success",
-		},
-	)
-}
-
 func (u UserController) parseSignUpRequest(ctx *gin.Context) (
-	*request.SignUpRequest,
+	*auth.SignUpRequest,
 	error,
 ) {
-	var req request.SignUpRequest
+	var req auth.SignUpRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		return nil, err
 	}
@@ -161,10 +159,10 @@ func (u UserController) parseSignUpRequest(ctx *gin.Context) (
 }
 
 func (u UserController) parseLoginRequest(ctx *gin.Context) (
-	*request.LoginRequest,
+	*auth.LoginRequest,
 	error,
 ) {
-	var req request.LoginRequest
+	var req auth.LoginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		return nil, err
 	}
@@ -172,10 +170,10 @@ func (u UserController) parseLoginRequest(ctx *gin.Context) (
 }
 
 func (u UserController) parseUpdateProfileRequest(ctx *gin.Context) (
-	*request.UpdateProfileRequest,
+	*auth.UpdateProfileRequest,
 	error,
 ) {
-	var req request.UpdateProfileRequest
+	var req auth.UpdateProfileRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		return nil, err
 	}

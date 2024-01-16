@@ -1,11 +1,11 @@
 package dto
 
 import (
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type JWTClaim struct {
 	Email string `json:"email"`
 	ID    string `json:"id"`
-	jwt.StandardClaims
+	jwt.MapClaims
 }

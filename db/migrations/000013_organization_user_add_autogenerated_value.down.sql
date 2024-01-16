@@ -1,0 +1,2 @@
+ALTER TABLE "Organization_Users"
+    ALTER COLUMN id SET DEFAULT NULL;

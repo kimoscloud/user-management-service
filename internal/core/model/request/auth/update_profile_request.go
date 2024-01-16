@@ -1,4 +1,4 @@
-package request
+package auth
 
 type UpdateProfileRequest struct {
 	FirstName string `json:"firstName"`

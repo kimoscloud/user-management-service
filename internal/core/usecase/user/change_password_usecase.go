@@ -1,27 +1,28 @@
-package usecase
+package user
 
 import (
 	"github.com/kimoscloud/user-management-service/internal/core/auth"
-	"github.com/kimoscloud/user-management-service/internal/core/model/entity"
+	entity "github.com/kimoscloud/user-management-service/internal/core/model/entity/auth"
 	"github.com/kimoscloud/user-management-service/internal/core/model/request"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
-	"github.com/kimoscloud/user-management-service/internal/core/ports/repository"
+	userRepository "github.com/kimoscloud/user-management-service/internal/core/ports/repository/user"
+	"github.com/kimoscloud/user-management-service/internal/core/utils"
 	"github.com/kimoscloud/value-types/errors"
 )
 
-type ChangePasswordUsecase struct {
-	userRepository repository.UserRepository
-	logger         logging.Logger
+type ChangePasswordUseCase struct {
+	userRepo userRepository.Repository
+	logger   logging.Logger
 }
 
 func NewChangePasswordUseCase(
-	ur repository.UserRepository,
+	ur userRepository.Repository,
 	logger logging.Logger,
-) *ChangePasswordUsecase {
-	return &ChangePasswordUsecase{userRepository: ur, logger: logger}
+) *ChangePasswordUseCase {
+	return &ChangePasswordUseCase{userRepo: ur, logger: logger}
 }
 
-func (p *ChangePasswordUsecase) Handle(
+func (p *ChangePasswordUseCase) Handle(
 	userId string, request *request.ChangePasswordRequest,
 ) *errors.AppError {
 	user, appError := p.checkIfUserExists(userId)
@@ -43,8 +44,8 @@ func (p *ChangePasswordUsecase) Handle(
 	return nil
 }
 
-func (p *ChangePasswordUsecase) checkIfUserExists(userId string) (*entity.User, *errors.AppError) {
-	user, err := p.userRepository.GetByID(userId)
+func (p *ChangePasswordUseCase) checkIfUserExists(userId string) (*entity.User, *errors.AppError) {
+	user, err := p.userRepo.GetByID(userId)
 	if err != nil {
 		p.logger.Error("Error getting user by id", err)
 		return nil, errors.NewInternalServerError(
@@ -65,12 +66,11 @@ func (p *ChangePasswordUsecase) checkIfUserExists(userId string) (*entity.User, 
 
 }
 
-func (p *ChangePasswordUsecase) comparePasswordsStep(
+func (p *ChangePasswordUseCase) comparePasswordsStep(
 	hash string,
 	password string,
 ) *errors.AppError {
-	err := comparePasswords(hash, password)
-	if err != nil {
+	if !utils.ComparePasswords(hash, password) {
 		return errors.NewUnauthorizedError(
 			"Old password is not correct",
 			"",
@@ -80,7 +80,7 @@ func (p *ChangePasswordUsecase) comparePasswordsStep(
 	return nil
 }
 
-func (p *ChangePasswordUsecase) hashAndSaltStep(password string) (string, *errors.AppError) {
+func (p *ChangePasswordUseCase) hashAndSaltStep(password string) (string, *errors.AppError) {
 	hashedPassword, err := auth.HashAndSalt(password)
 	if err != nil {
 		p.logger.Error("Error hashing password", "errors", err.Error())
@@ -93,8 +93,8 @@ func (p *ChangePasswordUsecase) hashAndSaltStep(password string) (string, *error
 	return hashedPassword, nil
 }
 
-func (p *ChangePasswordUsecase) updateUserStep(user *entity.User) *errors.AppError {
-	_, err := p.userRepository.Update(user)
+func (p *ChangePasswordUseCase) updateUserStep(user *entity.User) *errors.AppError {
+	_, err := p.userRepo.Update(user)
 	if err != nil {
 		p.logger.Error("Error updating user", err)
 		return errors.NewInternalServerError(
