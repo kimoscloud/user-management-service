@@ -10,6 +10,8 @@ import (
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/db"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/logging"
 	organizationRepository "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/organization"
+	roleRepository "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/organization/role"
+	userOrganizationRepository "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/organization/user-organization"
 	user2 "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/user"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/server"
 	"log"
@@ -39,6 +41,8 @@ func main() {
 	// Create the UserRepository
 	userRepo := user2.NewUserRepository(conn)
 	orgRepo := organizationRepository.NewOrganizationRepository(conn)
+	userOrgRepo := userOrganizationRepository.NewUserOrganizationRepository(conn)
+	roleRepo := roleRepository.NewRoleRepository(conn)
 
 	createUserUseCase := user.NewCreateUserUseCase(userRepo, logger)
 	authenticateUserUseCase := user.NewAuthenticateUserUseCase(
@@ -61,6 +65,8 @@ func main() {
 
 	createOrganizationUseCase := organization.NewCreateOrganizationUseCase(
 		orgRepo,
+		userOrgRepo,
+		roleRepo,
 		logger,
 	)
 

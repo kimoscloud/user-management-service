@@ -80,5 +80,6 @@ func (repo *RepositoryPostgres) Delete(id string) error {
 	return nil
 }
 
-
-func (repo *RepositoryPostgres) BeginTransaction() interface{} {
+func (repo *RepositoryPostgres) BeginTransaction() *gorm.DB {
+	return repo.db.Begin()
+}

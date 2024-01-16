@@ -3,6 +3,7 @@ package organization
 import (
 	"github.com/kimoscloud/user-management-service/internal/core/model/entity/organization"
 	types "github.com/kimoscloud/value-types/domain"
+	"gorm.io/gorm"
 )
 
 type Repository interface {
@@ -13,5 +14,5 @@ type Repository interface {
 	Create(organization *organization.Organization) (*organization.Organization, error)
 	Update(organization *organization.Organization) (*organization.Organization, error)
 	Delete(id string) error
-	BeginTransaction() interface{}
+	BeginTransaction() *gorm.DB
 }
