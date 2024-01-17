@@ -6,7 +6,7 @@ type Environment struct {
 	ID            string    `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
 	Name          string    `gorm:"type:varchar(255)"`
 	Description   string    `gorm:"type:text"`
-	ApplicationId string    `gorm:"type:uuid;not null"`
+	ApplicationID string    `gorm:"type:uuid;not null"`
 	IsActive      bool      `gorm:"type:boolean;default:true"`
 	CreatedBy     string    `gorm:"type:uuid;not null"`
 	CreatedAt     time.Time `gorm:"column:created_at;not null"`
