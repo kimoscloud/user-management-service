@@ -2,22 +2,22 @@ create table "Organization_Users"
 (
     id                 uuid                     not null
         primary key,
-    organization_id             uuid                     not null
+    organization_id    uuid                     not null
         constraint "Organization_Users_organization_id_fkey"
             references "Organizations"
             on update cascade on delete cascade,
-    user_id            uuid                  not null
+    user_id            uuid                     not null
         references "Users"
-            on update cascade,
+            on update cascade on delete cascade,
     role               text,
     created_at         timestamp with time zone not null,
     updated_at         timestamp with time zone not null,
     status             varchar(255),
-    role_id    uuid
+    role_id            uuid
         constraint organization_users_permission_role_fkey
             references "Roles",
     invite_sent_at     timestamp with time zone,
-    created_by_user_id uuid ,
+    created_by_user_id uuid,
     is_active          boolean default true
 );
 

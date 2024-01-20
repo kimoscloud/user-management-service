@@ -25,3 +25,4 @@ CREATE UNIQUE INDEX lower_organizations_unique_idx
 
 CREATE INDEX idx_organizations_id
     ON "Organizations" (id);
+
