@@ -1,4 +1,4 @@
-## USER MANAGEMENT SERVICE
+## USER MANAGEMENT SERVICE => Ex management service (Actually it's a monolith)
 
 Service responsible for managing users and their roles.
 
