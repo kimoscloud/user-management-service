@@ -47,15 +47,24 @@ func (repo *RepositoryPostgres) GetByID(id string) (*organization.Organization, 
 	}
 	return &organization, nil
 }
+
 func (repo *RepositoryPostgres) GetAllByUserId(userId string) ([]organization.Organization, error) {
 	var organizations []organization.Organization
-	if err := repo.db.Joins("inner join UserOrganization on organization.id = UserOrganization.organization_id").Find(&organizations).Error; err != nil {
+
+	if err := repo.db.
+		Table("Organizations").
+		Joins("INNER JOIN Organization_Users ON Organizations.ID = Organization_Users.OrganizationID").
+		Where("Organization_Users.UserID = ?", userId).
+		Find(&organizations).
+		Error; err != nil {
 		return nil, err
 	}
 	return organizations, nil
-
 }
-func (repo *RepositoryPostgres) Create(organization *organization.Organization, tx *gorm.DB) (*organization.Organization, error) {
+func (repo *RepositoryPostgres) Create(
+	organization *organization.Organization,
+	tx *gorm.DB,
+) (*organization.Organization, error) {
 	if tx == nil {
 		tx = repo.db
 	}

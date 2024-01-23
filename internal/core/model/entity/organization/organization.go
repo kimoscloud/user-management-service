@@ -19,12 +19,13 @@ type Organization struct {
 	Plan                  string `gorm:"type:varchar(255)"`
 	CurrentPeriodStartsAt *time.Time
 	CurrentPeriodEndsAt   *time.Time
-	SubscriptionID        string         `gorm:"type:varchar(255)"`
-	Status                string         `gorm:"type:varchar(255)"`
-	Timezone              string         `gorm:"type:varchar(255)"`
-	CreatedAt             time.Time      `gorm:"column:created_at;not null"`
-	UpdatedAt             time.Time      `gorm:"column:updated_at;not null"`
-	DeletedAt             gorm.DeletedAt `gorm:"column:deleted_at;index"`
+	SubscriptionID        string             `gorm:"type:varchar(255)"`
+	Status                string             `gorm:"type:varchar(255)"`
+	Timezone              string             `gorm:"type:varchar(255)"`
+	CreatedAt             time.Time          `gorm:"column:created_at;not null"`
+	UpdatedAt             time.Time          `gorm:"column:updated_at;not null"`
+	DeletedAt             gorm.DeletedAt     `gorm:"column:deleted_at;index"`
+	UserOrganizations     []UserOrganization `gorm:"foreignKey:OrganizationID"`
 }
 
 func (Organization) TableName() string {

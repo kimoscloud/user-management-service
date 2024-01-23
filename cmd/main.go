@@ -128,10 +128,15 @@ func initOrganizationController(
 		roleRepo,
 		logger,
 	)
+	getOrganizationsByUserIdUseCase := organization.NewGetOrganizationsByUserUseCase(
+		orgRepo,
+		logger,
+	)
 	organizationController := controller.NewOrganizationController(
 		instance,
 		logger,
 		createOrganizationUseCase,
+		getOrganizationsByUserIdUseCase,
 	)
 	organizationController.InitRouter()
 }
