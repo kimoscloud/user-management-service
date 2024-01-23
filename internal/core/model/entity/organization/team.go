@@ -16,3 +16,7 @@ type Team struct {
 	UpdatedAt      time.Time      `gorm:"column:updated_at;not null"`
 	DeletedAt      gorm.DeletedAt `gorm:"column:deleted_at;index"`
 }
+
+func (Team) TableName() string {
+	return "Teams"
+}
