@@ -130,6 +130,7 @@ func (oc OrganizationController) getOrganizations(c *gin.Context) {
 		c.AbortWithStatusJSON(appError.HTTPStatus, appError)
 		return
 	}
+
 	c.JSON(http.StatusOK, result)
 }
 

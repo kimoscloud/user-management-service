@@ -53,8 +53,11 @@ func (repo *RepositoryPostgres) GetAllByUserId(userId string) ([]organization.Or
 
 	if err := repo.db.
 		Table("Organizations").
-		Joins("INNER JOIN Organization_Users ON Organizations.ID = Organization_Users.OrganizationID").
-		Where("Organization_Users.UserID = ?", userId).
+		Joins(
+			"INNER JOIN \"Organization_Users\" ON \"Organizations\".id = \"Organization_Users\"."+
+				"organization_id",
+		).
+		Where("\"Organization_Users\".user_id = ?", userId).
 		Find(&organizations).
 		Error; err != nil {
 		return nil, err

@@ -1,7 +1,7 @@
 package organization
 
 import (
-	"github.com/kimoscloud/user-management-service/internal/core/model/entity/organization"
+	organizationResponse "github.com/kimoscloud/user-management-service/internal/core/model/response/organization"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	repository "github.com/kimoscloud/user-management-service/internal/core/ports/repository/organization"
 	"github.com/kimoscloud/value-types/errors"
@@ -18,14 +18,13 @@ func NewGetOrganizationsByUserUseCase(
 ) *GetOrganizationsByUserUseCase {
 	return &GetOrganizationsByUserUseCase{
 		organizationRepository: organizationRepository,
-
-		logger: logger,
+		logger:                 logger,
 	}
 }
 
 func (cu GetOrganizationsByUserUseCase) Handler(
 	userId string,
-) ([]organization.Organization, *errors.AppError) {
+) ([]organizationResponse.OrganizationListLightElement, *errors.AppError) {
 	organizationResult, err := cu.organizationRepository.GetAllByUserId(userId)
 	if err != nil {
 		return nil, errors.NewInternalServerError(
@@ -34,5 +33,17 @@ func (cu GetOrganizationsByUserUseCase) Handler(
 			errors.ErrorCreatingUser,
 		).AppError
 	}
-	return organizationResult, nil
+	//Map result to response
+	var response []organizationResponse.OrganizationListLightElement
+	for _, organization := range organizationResult {
+		response = append(
+			response, organizationResponse.OrganizationListLightElement{
+				ID:       organization.ID,
+				Name:     organization.Name,
+				Slug:     organization.Slug,
+				ImageUrl: organization.LogoURL,
+			},
+		)
+	}
+	return response, nil
 }
