@@ -41,11 +41,11 @@ func (repo *RepositoryPostgres) GetPage(
 }
 
 func (repo *RepositoryPostgres) GetByID(id string) (*organization.Organization, error) {
-	var organization organization.Organization
-	if err := repo.db.Where("id = ?", id).First(&organization).Error; err != nil {
+	var orgResult organization.Organization
+	if err := repo.db.Where("id = ?", id).First(&orgResult).Error; err != nil {
 		return nil, err
 	}
-	return &organization, nil
+	return &orgResult, nil
 }
 
 func (repo *RepositoryPostgres) GetAllByUserId(userId string) ([]organization.Organization, error) {
@@ -64,6 +64,27 @@ func (repo *RepositoryPostgres) GetAllByUserId(userId string) ([]organization.Or
 	}
 	return organizations, nil
 }
+func (repo *RepositoryPostgres) GetByIDAndUserId(
+	orgId string,
+	userId string,
+) (*organization.Organization, error) {
+	var orgResult organization.Organization
+	if err := repo.db.
+		Table("Organizations").
+		Joins(
+			"INNER JOIN \"Organization_Users\" ou ON \"Organizations\"."+
+				"id = ou."+"organization_id",
+		).
+		Where(" ou.user_id = ?", userId).
+		Where("\"Organizations\".id = ?", orgId).
+		Where("ou.is_active = ?", true).
+		First(&orgResult).
+		Error; err != nil {
+		return nil, err
+	}
+	return &orgResult, nil
+}
+
 func (repo *RepositoryPostgres) Create(
 	organization *organization.Organization,
 	tx *gorm.DB,

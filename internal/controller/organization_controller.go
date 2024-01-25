@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	organizationRequest "github.com/kimoscloud/user-management-service/internal/core/model/request/organization"
+	organizationRequest "github.com/kimoscloud/user-management-service/internal/core/model/response/organization"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	usecase "github.com/kimoscloud/user-management-service/internal/core/usecase/organization"
 	"github.com/kimoscloud/user-management-service/internal/middleware"
@@ -10,23 +11,26 @@ import (
 )
 
 type OrganizationController struct {
-	gin                             *gin.Engine
-	createOrganizationUseCase       *usecase.CreateOrganizationUseCase
-	getOrganizationsByUserIdUseCase *usecase.GetOrganizationsByUserUseCase
-	logger                          logging.Logger
+	gin                                    *gin.Engine
+	createOrganizationUseCase              *usecase.CreateOrganizationUseCase
+	getOrganizationsByUserIdUseCase        *usecase.GetOrganizationsByUserUseCase
+	getOrganizationByOrgIdAndUserIdUseCase *usecase.GetOrganizationByOrgIAndUserIddUseCase
+	logger                                 logging.Logger
 }
 
 func NewOrganizationController(
 	gin *gin.Engine,
 	logger logging.Logger,
 	createOrganizationUseCase *usecase.CreateOrganizationUseCase,
+	getOrganizationByOrgIdAndUserIdUseCase *usecase.GetOrganizationByOrgIAndUserIddUseCase,
 	getOrganizationsByUserIdUseCase *usecase.GetOrganizationsByUserUseCase,
 ) OrganizationController {
 	return OrganizationController{
-		gin:                             gin,
-		logger:                          logger,
-		createOrganizationUseCase:       createOrganizationUseCase,
-		getOrganizationsByUserIdUseCase: getOrganizationsByUserIdUseCase,
+		gin:                                    gin,
+		logger:                                 logger,
+		createOrganizationUseCase:              createOrganizationUseCase,
+		getOrganizationByOrgIdAndUserIdUseCase: getOrganizationByOrgIdAndUserIdUseCase,
+		getOrganizationsByUserIdUseCase:        getOrganizationsByUserIdUseCase,
 	}
 }
 
@@ -47,6 +51,7 @@ func (oc OrganizationController) InitRouter() {
 	//TODO implement billing methods
 	api.PUT("/:orgId", oc.updateOrganization)
 	api.DELETE("/:orgId", oc.deleteOrganization)
+	api.GET("/:orgId", oc.getOrganization)
 	api.POST("", oc.createOrganization)
 	api.GET("", oc.getOrganizations)
 }
@@ -121,6 +126,18 @@ func (oc OrganizationController) createOrganization(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, result)
+}
+
+func (oc OrganizationController) getOrganization(c *gin.Context) {
+	userId := c.GetString("kimosUserId")
+	orgId := c.Param("orgId")
+	result, appError := oc.getOrganizationByOrgIdAndUserIdUseCase.Handler(orgId, userId)
+	if appError != nil {
+		c.AbortWithStatusJSON(appError.HTTPStatus, appError)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.)
 }
 
 func (oc OrganizationController) getOrganizations(c *gin.Context) {

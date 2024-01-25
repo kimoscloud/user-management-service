@@ -7,7 +7,6 @@ import (
 	"time"
 )
 
-// Ejemplo de cómo generar un token
 func GenerateJWT(id string, email string, expirationTime time.Time) (string, error) {
 	jwtKey := []byte("your-secret-key") // Usa tu clave secreta aquí
 

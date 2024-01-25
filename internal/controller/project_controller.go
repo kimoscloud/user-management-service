@@ -22,6 +22,14 @@ func NewProjectController(
 
 func (pc ProjectController) InitRouter() {
 	api := pc.gin.Group("/api/v1/project")
+	//api.GET("/:projectId/applications/:applicationId", pc.getApplicationById)
+	//api.PUT("/:projectId/applications/:applicationId", pc.getApplicationById)
+	//api.DELETE("/:projectId/applications/:applicationId", pc.deleteApplicationById)
+	//api.POST("/:projectId/applications", pc.createApplication)
+	//api.POST("/:projectId/applications", pc.getApplicationsByProjectId) //create application
+	//api.POST("/:projectId/teams", pc.assignTeamToApplication)           //
+	//api.PUT("/:projectId/teams/:teamId", pc.assignTeamToApplication)
+	//api.DELETE("/:projectId/teams", pc.assignTeamToApplication)
 	api.GET("/:projectId", pc.getProjectById)
 	api.PUT("/:projectId", pc.updateProject)
 	api.DELETE("/:projectId", pc.deleteProject)
