@@ -6,8 +6,7 @@ import (
 )
 
 type User struct {
-	gorm.Model
-	ID                         string         `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	ID                         string         `gorm:"column:id;type:uuid;default:uuid_generate_v4();primaryKey"`
 	FirstName                  string         `gorm:"column:first_name"`
 	LastName                   string         `gorm:"column:last_name"`
 	AcceptTermsAndConditions   bool           `gorm:"column:accept_terms_and_conditions"`

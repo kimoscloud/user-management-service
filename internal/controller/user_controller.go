@@ -110,7 +110,7 @@ func (u UserController) signUp(c *gin.Context) {
 		c.AbortWithStatusJSON(appError.HTTPStatus, appError)
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{})
+	c.Status(http.StatusCreated)
 	return
 }
 

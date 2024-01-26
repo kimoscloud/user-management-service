@@ -6,7 +6,6 @@ import (
 )
 
 type Organization struct {
-	gorm.Model
 	ID                    string `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
 	Name                  string `gorm:"type:varchar(255)"`
 	CreatedBy             string `gorm:"type:uuid;not null"`

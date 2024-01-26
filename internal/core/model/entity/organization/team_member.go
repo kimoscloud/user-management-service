@@ -6,7 +6,6 @@ import (
 )
 
 type TeamMember struct {
-	gorm.Model
 	ID        string         `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
 	TeamID    string         `gorm:"type:uuid;not null"`
 	UserID    string         `gorm:"type:uuid;not null"`

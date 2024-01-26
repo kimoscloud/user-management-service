@@ -3,6 +3,7 @@ package configuration
 import (
 	"os"
 	"strconv"
+	"time"
 )
 
 type DBConfig struct {
@@ -11,6 +12,9 @@ type DBConfig struct {
 	databaseHost     string
 	databasePort     int
 	databaseName     string
+	maxIdleConns     int
+	maxOpenConns     int
+	connMaxLifetime  int
 }
 
 // Getters for DBConfig
@@ -34,6 +38,15 @@ func (dbConfig *DBConfig) GetDatabasePort() int {
 func (dbConfig *DBConfig) GetDatabaseName() string {
 	return dbConfig.databaseName
 }
+func (dbConfig *DBConfig) GetMaxIdleConnections() int {
+	return dbConfig.maxIdleConns
+}
+func (dbConfig *DBConfig) GetMaxOpenConnections() int {
+	return dbConfig.maxOpenConns
+}
+func (dbConfig *DBConfig) GetConnectionMaxLifetime() time.Duration {
+	return time.Duration(dbConfig.connMaxLifetime) * time.Second
+}
 
 var dbConfiguration *DBConfig
 
@@ -55,4 +68,8 @@ func initDBConfig() {
 		panic("Error parsing the database port")
 	}
 	dbConfiguration.databaseName = os.Getenv("DB_NAME")
+	dbConfiguration.maxIdleConns, err = strconv.Atoi(os.Getenv("MAX_IDLE_CONNS"))
+	dbConfiguration.maxOpenConns, err = strconv.Atoi(os.Getenv("MAX_OPEN_CONNS"))
+	dbConfiguration.connMaxLifetime, err = strconv.Atoi(os.Getenv("CONN_MAX_LIFETIME"))
+
 }

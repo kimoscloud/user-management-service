@@ -40,15 +40,15 @@ func (repo *RepositoryPostgres) GetPage(
 		Build(), nil
 }
 
-func (repo *RepositoryPostgres) GetUserOrganizationByUserAndOrganizationWithRolesAndPermissions(userId, orgId string) (*organization.UserOrganization, error) {
+func (repo *RepositoryPostgres) GetUserOrganizationByUserAndOrganizationWithRolesAndPermissions(userId, orgId string) (
+	*organization.UserOrganization,
+	error,
+) {
 	var userOrganization organization.UserOrganization
-	if err := repo.db.
-		Joins("Roles").
-		Joins("Permissions").
+	if err := repo.db.Preload("Role.Permissions").
 		Where("user_id = ?", userId).
 		Where("organization_id = ?", orgId).
-		Where("is_active = ?", true).
-		Where("deleted_at = ?", nil).
+		Where("is_active = ? AND deleted_at IS NULL", true).
 		First(&userOrganization).Error; err != nil {
 		return nil, err
 	}
@@ -63,7 +63,10 @@ func (repo *RepositoryPostgres) GetByID(id string) (*organization.UserOrganizati
 	return &userOrganization, nil
 }
 
-func (repo *RepositoryPostgres) GetAllByUserId(userId string) ([]organization.UserOrganization, error) {
+func (repo *RepositoryPostgres) GetAllByUserId(userId string) (
+	[]organization.UserOrganization,
+	error,
+) {
 	var userOrganizations []organization.UserOrganization
 	if err := repo.db.Where("user_id = ?").Find(&userOrganizations).Error; err != nil {
 		return nil, err
@@ -71,7 +74,10 @@ func (repo *RepositoryPostgres) GetAllByUserId(userId string) ([]organization.Us
 	return userOrganizations, nil
 
 }
-func (repo *RepositoryPostgres) Create(userOrganization *organization.UserOrganization, tx *gorm.DB) (
+func (repo *RepositoryPostgres) Create(
+	userOrganization *organization.UserOrganization,
+	tx *gorm.DB,
+) (
 	*organization.UserOrganization,
 	error,
 ) {
@@ -93,28 +99,44 @@ func (repo *RepositoryPostgres) Update(userOrganization *organization.UserOrgani
 	return userOrganization, nil
 }
 func (repo *RepositoryPostgres) Delete(id string) error {
-	if err := repo.db.Where("id = ?", id).Delete(&organization.UserOrganization{}).Error; err != nil {
+	if err := repo.db.Where(
+		"id = ?",
+		id,
+	).Delete(&organization.UserOrganization{}).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (repo *RepositoryPostgres) DeleteByUserId(userId string) error {
-	if err := repo.db.Where("user_id = ?", userId).Delete(&organization.UserOrganization{}).Error; err != nil {
+	if err := repo.db.Where(
+		"user_id = ?",
+		userId,
+	).Delete(&organization.UserOrganization{}).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (repo *RepositoryPostgres) DeleteByOrganizationId(organizationId string) error {
-	if err := repo.db.Where("organization_id = ?", organizationId).Delete(&organization.UserOrganization{}).Error; err != nil {
+	if err := repo.db.Where(
+		"organization_id = ?",
+		organizationId,
+	).Delete(&organization.UserOrganization{}).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (repo *RepositoryPostgres) DeleteByOrganizationIdAndUserId(organizationId string, userId string) error {
-	if err := repo.db.Where("user_id = ? AND organization_id = ?", userId, organizationId).Delete(&organization.UserOrganization{}).Error; err != nil {
+func (repo *RepositoryPostgres) DeleteByOrganizationIdAndUserId(
+	organizationId string,
+	userId string,
+) error {
+	if err := repo.db.Where(
+		"user_id = ? AND organization_id = ?",
+		userId,
+		organizationId,
+	).Delete(&organization.UserOrganization{}).Error; err != nil {
 		return err
 	}
 	return nil

@@ -64,7 +64,7 @@ func (oc OrganizationController) getTeamMembers(c *gin.Context) {
 }
 
 func (oc OrganizationController) addTeamMembers(c *gin.Context) {
-
+	//TODO implement
 }
 
 func (oc OrganizationController) removeTeamMembers(c *gin.Context) {
@@ -101,6 +101,7 @@ func (oc OrganizationController) removeOrganizationMember(c *gin.Context) {
 
 func (oc OrganizationController) createOrganizationMember(c *gin.Context) {
 	userId := c.GetString("kimosUserId")
+	orgId := c.Param("orgId")
 	request, err := oc.parseCreateOrganizationMembersRequest(c)
 	if err != nil {
 		c.AbortWithStatusJSON(
@@ -110,11 +111,12 @@ func (oc OrganizationController) createOrganizationMember(c *gin.Context) {
 		)
 		return
 	}
-	resp, appErr := oc.createOrganizationMemberUseCase.Handler(userId, orgId, request)
+	appErr := oc.createOrganizationMemberUseCase.Handler(userId, orgId, request)
 	if appErr != nil {
 		c.AbortWithStatusJSON(appErr.HTTPStatus, appErr)
 		return
 	}
+	c.Status(http.StatusCreated)
 }
 
 func (oc OrganizationController) updateOrganization(c *gin.Context) {
@@ -154,16 +156,18 @@ func (oc OrganizationController) getOrganization(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, organizationResponse.OrganizationResponse{
-		ID:                 result.ID,
-		Name:               result.Name,
-		Slug:               result.Slug,
-		LogoUrl:            result.LogoURL,
-		BackgroundImageUrl: result.BackgroundImageURL,
-		BillingEmail:       result.BillingEmail,
-		Timezone:           result.Timezone,
-		URL:                result.URL,
-	})
+	c.JSON(
+		http.StatusOK, organizationResponse.OrganizationResponse{
+			ID:                 result.ID,
+			Name:               result.Name,
+			Slug:               result.Slug,
+			LogoUrl:            result.LogoURL,
+			BackgroundImageUrl: result.BackgroundImageURL,
+			BillingEmail:       result.BillingEmail,
+			Timezone:           result.Timezone,
+			URL:                result.URL,
+		},
+	)
 }
 
 func (oc OrganizationController) getOrganizations(c *gin.Context) {

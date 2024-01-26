@@ -6,7 +6,6 @@ import (
 )
 
 type Application struct {
-	gorm.Model
 	ID                    string         `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
 	About                 string         `gorm:"type:text"`
 	Name                  string         `gorm:"type:varchar(255)"`
