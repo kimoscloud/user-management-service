@@ -7,15 +7,15 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserRepositoryPostgres struct {
+type RepositoryPostgres struct {
 	db *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) *UserRepositoryPostgres {
-	return &UserRepositoryPostgres{db: db}
+func NewUserRepository(db *gorm.DB) *RepositoryPostgres {
+	return &RepositoryPostgres{db: db}
 }
 
-func (repo *UserRepositoryPostgres) GetAll() ([]auth.User, error) {
+func (repo *RepositoryPostgres) GetAll() ([]auth.User, error) {
 	var users []auth.User
 	if err := repo.db.Find(&users).Error; err != nil {
 		return nil, err
@@ -23,7 +23,19 @@ func (repo *UserRepositoryPostgres) GetAll() ([]auth.User, error) {
 	return users, nil
 }
 
-func (repo *UserRepositoryPostgres) GetPage(
+func (repo *RepositoryPostgres) GetUserByEmailLike(search string, limit int) ([]auth.User, error) {
+	var users []auth.User
+	query := repo.db.Where("email ILIKE ? AND is_deleted ", search)
+	if limit <= 10 {
+		query.Limit(limit)
+	}
+	if err := query.Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+func (repo *RepositoryPostgres) GetPage(
 	pageNumber int,
 	pageSize int,
 ) (types.Page[auth.User], error) {
@@ -41,7 +53,7 @@ func (repo *UserRepositoryPostgres) GetPage(
 		Build(), nil
 }
 
-func (repo *UserRepositoryPostgres) GetByID(id string) (*auth.User, error) {
+func (repo *RepositoryPostgres) GetByID(id string) (*auth.User, error) {
 	var user auth.User
 	result := repo.db.Model(&auth.User{}).Where("id = ?", id).First(&user)
 	if result.Error != nil {
@@ -53,7 +65,7 @@ func (repo *UserRepositoryPostgres) GetByID(id string) (*auth.User, error) {
 	return &user, nil
 }
 
-func (repo *UserRepositoryPostgres) GetByEmail(email string) (
+func (repo *RepositoryPostgres) GetByEmail(email string) (
 	*auth.User,
 	error,
 ) {
@@ -72,7 +84,7 @@ func (repo *UserRepositoryPostgres) GetByEmail(email string) (
 }
 
 // TODO add context here
-func (repo *UserRepositoryPostgres) Create(user *auth.User) (
+func (repo *RepositoryPostgres) Create(user *auth.User) (
 	*auth.User,
 	error,
 ) {
@@ -83,7 +95,7 @@ func (repo *UserRepositoryPostgres) Create(user *auth.User) (
 	return repo.GetByID(user.ID)
 }
 
-func (repo *UserRepositoryPostgres) Update(user *auth.User) (
+func (repo *RepositoryPostgres) Update(user *auth.User) (
 	*auth.User,
 	error,
 ) {
@@ -93,6 +105,6 @@ func (repo *UserRepositoryPostgres) Update(user *auth.User) (
 	}
 	return repo.GetByID(user.ID)
 }
-func (repo *UserRepositoryPostgres) Delete(id string) error {
+func (repo *RepositoryPostgres) Delete(id string) error {
 	return errors.New("unimplemented")
 }

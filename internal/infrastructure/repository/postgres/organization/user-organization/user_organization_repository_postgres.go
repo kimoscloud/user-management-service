@@ -40,6 +40,21 @@ func (repo *RepositoryPostgres) GetPage(
 		Build(), nil
 }
 
+func (repo *RepositoryPostgres) GetUserOrganizationByUserAndOrganizationWithRolesAndPermissions(userId, orgId string) (*organization.UserOrganization, error) {
+	var userOrganization organization.UserOrganization
+	if err := repo.db.
+		Joins("Roles").
+		Joins("Permissions").
+		Where("user_id = ?", userId).
+		Where("organization_id = ?", orgId).
+		Where("is_active = ?", true).
+		Where("deleted_at = ?", nil).
+		First(&userOrganization).Error; err != nil {
+		return nil, err
+	}
+	return &userOrganization, nil
+}
+
 func (repo *RepositoryPostgres) GetByID(id string) (*organization.UserOrganization, error) {
 	var userOrganization organization.UserOrganization
 	if err := repo.db.Where("id = ?", id).First(&userOrganization).Error; err != nil {

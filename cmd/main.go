@@ -105,7 +105,7 @@ func initProjectController(
 	userProjectRepo *userProjectRepository.RepositoryPostgres,
 	teamProjectRepo *teamProjectRepository.RepositoryPostgres,
 	roleRepo *roleRepository.RepositoryPostgres,
-	userRepo *user2.UserRepositoryPostgres,
+	userRepo *user2.RepositoryPostgres,
 	teamRepo *teamRepository.RepositoryPostgres,
 	logger logging2.Logger,
 ) {
@@ -149,7 +149,7 @@ func initOrganizationController(
 // TODO use interfaces here`
 func initUserController(
 	instance *gin.Engine,
-	userRepo *user2.UserRepositoryPostgres,
+	userRepo *user2.RepositoryPostgres,
 	logger logging2.Logger,
 ) {
 	createUserUseCase := user.NewCreateUserUseCase(userRepo, logger)

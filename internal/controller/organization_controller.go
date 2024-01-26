@@ -15,6 +15,7 @@ type OrganizationController struct {
 	createOrganizationUseCase              *usecase.CreateOrganizationUseCase
 	getOrganizationsByUserIdUseCase        *usecase.GetOrganizationsByUserUseCase
 	getOrganizationByOrgIdAndUserIdUseCase *usecase.GetOrganizationByOrgIAndUserIddUseCase
+	createOrganizationMemberUseCase        *usecase.CreateOrganizationMemberUseCase
 	logger                                 logging.Logger
 }
 
@@ -24,6 +25,7 @@ func NewOrganizationController(
 	createOrganizationUseCase *usecase.CreateOrganizationUseCase,
 	getOrganizationByOrgIdAndUserIdUseCase *usecase.GetOrganizationByOrgIAndUserIddUseCase,
 	getOrganizationsByUserIdUseCase *usecase.GetOrganizationsByUserUseCase,
+	createOrganizationMemberUseCase *usecase.CreateOrganizationMemberUseCase,
 ) OrganizationController {
 	return OrganizationController{
 		gin:                                    gin,
@@ -31,6 +33,7 @@ func NewOrganizationController(
 		createOrganizationUseCase:              createOrganizationUseCase,
 		getOrganizationByOrgIdAndUserIdUseCase: getOrganizationByOrgIdAndUserIdUseCase,
 		getOrganizationsByUserIdUseCase:        getOrganizationsByUserIdUseCase,
+		createOrganizationMemberUseCase:        createOrganizationMemberUseCase,
 	}
 }
 
@@ -61,7 +64,7 @@ func (oc OrganizationController) getTeamMembers(c *gin.Context) {
 }
 
 func (oc OrganizationController) addTeamMembers(c *gin.Context) {
-	//TODO implement
+
 }
 
 func (oc OrganizationController) removeTeamMembers(c *gin.Context) {
@@ -97,7 +100,21 @@ func (oc OrganizationController) removeOrganizationMember(c *gin.Context) {
 }
 
 func (oc OrganizationController) createOrganizationMember(c *gin.Context) {
-	//TODO implement
+	userId := c.GetString("kimosUserId")
+	request, err := oc.parseCreateOrganizationMembersRequest(c)
+	if err != nil {
+		c.AbortWithStatusJSON(
+			400, &gin.H{
+				"message": "Invalid request",
+			},
+		)
+		return
+	}
+	resp, appErr := oc.createOrganizationMemberUseCase.Handler(userId, orgId, request)
+	if appErr != nil {
+		c.AbortWithStatusJSON(appErr.HTTPStatus, appErr)
+		return
+	}
 }
 
 func (oc OrganizationController) updateOrganization(c *gin.Context) {
@@ -165,6 +182,18 @@ func (oc OrganizationController) parseCreateOrganizationRequest(ctx *gin.Context
 	error,
 ) {
 	var request organizationRequest.CreateOrganizationRequest
+	err := ctx.ShouldBindJSON(&request)
+	if err != nil {
+		return nil, err
+	}
+	return &request, nil
+}
+
+func (oc OrganizationController) parseCreateOrganizationMembersRequest(ctx *gin.Context) (
+	*organizationRequest.CreateOrganizationUsers,
+	error,
+) {
+	var request organizationRequest.CreateOrganizationUsers
 	err := ctx.ShouldBindJSON(&request)
 	if err != nil {
 		return nil, err

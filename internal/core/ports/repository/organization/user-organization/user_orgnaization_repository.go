@@ -11,6 +11,7 @@ type Repository interface {
 	GetPage(pageNumber int, pageSize int) (types.Page[organization.UserOrganization], error)
 	GetByID(id string) (*organization.UserOrganization, error)
 	GetAllByUserId(userId string) ([]organization.UserOrganization, error)
+	GetUserOrganizationByUserAndOrganizationWithRolesAndPermissions(userId, orgId string) (*organization.UserOrganization, error)
 	Create(userOrganization *organization.UserOrganization, tx *gorm.DB) (*organization.UserOrganization, error)
 	Update(userOrganization *organization.UserOrganization) (*organization.UserOrganization, error)
 	Delete(id string) error
