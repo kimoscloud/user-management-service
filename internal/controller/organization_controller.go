@@ -3,7 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	organizationRequest "github.com/kimoscloud/user-management-service/internal/core/model/request/organization"
-	organizationRequest "github.com/kimoscloud/user-management-service/internal/core/model/response/organization"
+	organizationResponse "github.com/kimoscloud/user-management-service/internal/core/model/response/organization"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	usecase "github.com/kimoscloud/user-management-service/internal/core/usecase/organization"
 	"github.com/kimoscloud/user-management-service/internal/middleware"
@@ -35,7 +35,7 @@ func NewOrganizationController(
 }
 
 func (oc OrganizationController) InitRouter() {
-	api := oc.gin.Group("/api/v1/organization", middleware.Auth())
+	api := oc.gin.Group("/api/v1/organizations", middleware.Auth())
 	api.GET("/:orgId/teams/:teamId/members", oc.getTeamMembers)
 	api.POST("/:orgId/teams/:teamId/members", oc.addTeamMembers)
 	api.DELETE("/:orgId/teams/:teamId/members", oc.removeTeamMembers)
@@ -137,7 +137,16 @@ func (oc OrganizationController) getOrganization(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.)
+	c.JSON(http.StatusOK, organizationResponse.OrganizationResponse{
+		ID:                 result.ID,
+		Name:               result.Name,
+		Slug:               result.Slug,
+		LogoUrl:            result.LogoURL,
+		BackgroundImageUrl: result.BackgroundImageURL,
+		BillingEmail:       result.BillingEmail,
+		Timezone:           result.Timezone,
+		URL:                result.URL,
+	})
 }
 
 func (oc OrganizationController) getOrganizations(c *gin.Context) {
