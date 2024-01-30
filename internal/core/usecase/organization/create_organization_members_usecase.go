@@ -8,7 +8,9 @@ import (
 	roleRepository "github.com/kimoscloud/user-management-service/internal/core/ports/repository/organization/role"
 	userOrganizationRepository "github.com/kimoscloud/user-management-service/internal/core/ports/repository/organization/user-organization"
 	userRepository "github.com/kimoscloud/user-management-service/internal/core/ports/repository/user"
+	"github.com/kimoscloud/value-types/domain"
 	"github.com/kimoscloud/value-types/errors"
+	"time"
 )
 
 type CreateOrganizationMemberUseCase struct {
@@ -49,12 +51,46 @@ func (cu CreateOrganizationMemberUseCase) Handler(
 			"0000011",
 		).AppError
 	}
-	cu.checkIfAuthenticatedOrgUserHasPermission(authenticatedOrgUser)
-	return nil
-}
+	authenticatedOrgUser.CheckIfOrgUserHasPermissions(
+		[]string{domain.PERMISSION_ADD_ORGANIZATION_MEMBER},
+	)
+	role, err := cu.roleRepo.GetRoleByIdAndOrgId(request.RoleId, orgId)
+	if err != nil {
+		//TODO replace the error code here
+		return errors.NewInternalServerError(
+			"Error inviting user to the organization",
+			"Error searching the role",
+			"0000012",
+		).AppError
+	}
+	if role == nil {
+		//TODO replace the error code here
+		return errors.NewNotFoundError(
+			"Error inviting user to the organization",
+			"Role not found",
+			"0000013",
+		).AppError
+	}
+	users, err := cu.userRepo.FindUsersByEmails(request.Emails)
+	if err != nil {
+		//TODO replace the error code here
+		return errors.NewInternalServerError(
+			"Error inviting user to the organization",
+			"Error searching the users",
+			"0000014",
+		).AppError
+	}
+	var userOrganizations []organization.UserOrganization
+	for _, user := range users {
+		userOrg := organization.UserOrganization{
+			UserID:         user.ID,
+			OrganizationID: orgId,
+			RoleID:         role.ID,
+			InvitedAt:      time.Now(),
+		}
+		userOrganizations = append(userOrganizations, userOrg)
+	}
+	err = cu.userOrganizationRepo.CreateUserOrganizations(userOrganizations, nil)
 
-func (cu CreateOrganizationMemberUseCase) checkIfAuthenticatedOrgUserHasPermission(
-	user *organization.UserOrganization,
-) bool {
-	return false
+	return nil
 }

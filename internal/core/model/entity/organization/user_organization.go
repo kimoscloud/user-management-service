@@ -22,3 +22,24 @@ type UserOrganization struct {
 func (UserOrganization) TableName() string {
 	return "Organization_Users"
 }
+
+func (o UserOrganization) hasPermission(permission string) bool {
+	if o.Role.ID == "" || o.Role.Permissions == nil {
+		return false
+	}
+	for _, p := range o.Role.Permissions {
+		if p.InternalName == permission {
+			return true
+		}
+	}
+	return false
+}
+
+func (o UserOrganization) CheckIfOrgUserHasPermissions(permissions []string) bool {
+	for _, permission := range permissions {
+		if !o.hasPermission(permission) {
+			return false
+		}
+	}
+	return true
+}

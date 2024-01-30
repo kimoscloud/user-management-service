@@ -74,6 +74,18 @@ func (repo *RepositoryPostgres) GetAllByUserId(userId string) (
 	return userOrganizations, nil
 
 }
+func (repo *RepositoryPostgres) CreateUserOrganizations(
+	userOrganization []organization.UserOrganization,
+	tx *gorm.DB,
+) error {
+	if tx == nil {
+		tx = repo.db
+	}
+	if err := tx.Create(&userOrganization).Error; err != nil {
+		return err
+	}
+	return nil
+}
 func (repo *RepositoryPostgres) Create(
 	userOrganization *organization.UserOrganization,
 	tx *gorm.DB,

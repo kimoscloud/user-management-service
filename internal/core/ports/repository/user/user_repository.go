@@ -14,4 +14,5 @@ type Repository interface {
 	Create(user *auth.User) (*auth.User, error)
 	Update(user *auth.User) (*auth.User, error)
 	Delete(id string) error
+	FindUsersByEmails(emails []string) ([]auth.User, error)
 }

@@ -28,6 +28,18 @@ func (repo *RepositoryPostgres) GetByID(id string) (*organization.Role, error) {
 	}
 	return &role, nil
 }
+func (repo *RepositoryPostgres) GetRoleByIdAndOrgId(
+	roleId string,
+	orgId string,
+) (*organization.Role, error) {
+	var role organization.Role
+	if err := repo.db.Where("id = ?", roleId).
+		Where("organization_id = ? OR organization_id IS NULL", orgId).
+		First(&role).Error; err != nil {
+		return nil, err
+	}
+	return &role, nil
+}
 
 func (repo *RepositoryPostgres) Create(role *organization.Role) (
 	*organization.Role,

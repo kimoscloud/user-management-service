@@ -12,4 +12,5 @@ type Repository interface {
 	Update(organization *organization.Role) (*organization.Role, error)
 	Delete(id string) error
 	BeginTransaction() *gorm.DB
+	GetRoleByIdAndOrgId(roleId string, orgId string) (*organization.Role, error)
 }

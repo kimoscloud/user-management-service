@@ -15,6 +15,13 @@ func NewUserRepository(db *gorm.DB) *RepositoryPostgres {
 	return &RepositoryPostgres{db: db}
 }
 
+func (repo *RepositoryPostgres) FindUsersByEmails(emails []string) ([]auth.User, error) {
+	var users []auth.User
+	if err := repo.db.Where("email in ?", emails).Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}
 func (repo *RepositoryPostgres) GetAll() ([]auth.User, error) {
 	var users []auth.User
 	if err := repo.db.Find(&users).Error; err != nil {
