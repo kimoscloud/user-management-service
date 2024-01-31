@@ -77,18 +77,18 @@ func (repo *RepositoryPostgres) GetByEmail(email string) (
 	*auth.User,
 	error,
 ) {
-	var user auth.User
+	var userResult auth.User
 	result := repo.db.Model(&auth.User{}).Where(
 		"email = ?",
 		email,
-	).First(&user)
+	).First(&userResult)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
 		return nil, result.Error
 	}
-	return &user, nil
+	return &userResult, nil
 }
 
 // TODO add context here
