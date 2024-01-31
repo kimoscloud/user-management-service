@@ -23,6 +23,18 @@ func (repo *RepositoryPostgres) FindUsersByEmails(emails []string) ([]auth.User,
 	}
 	return users, nil
 }
+
+func (repo *RepositoryPostgres) LockUser(id string) error {
+	return repo.db.Model(&auth.User{}).Where("id = ?", id).Update("is_locked", true).Error
+}
+
+func (repo *RepositoryPostgres) IncrementBadLoginAttempts(id string) error {
+	return repo.db.Model(&auth.User{}).Where("id = ?", id).Update(
+		"bad_attempts",
+		gorm.Expr("bad_attempts + ?", 1),
+	).Error
+}
+
 func (repo *RepositoryPostgres) GetAll() ([]auth.User, error) {
 	var users []auth.User
 	if err := repo.db.Find(&users).Error; err != nil {

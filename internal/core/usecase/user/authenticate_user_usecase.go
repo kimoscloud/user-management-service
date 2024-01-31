@@ -44,14 +44,34 @@ func (p *AuthenticateUserUseCase) Handler(request auth2.LoginRequest) (
 		).AppError
 	}
 	if result.IsLocked || result.BadLoginAttempts >= 5 {
+		if result.IsLocked {
+			err = p.userRepository.LockUser(result.ID)
+			if err != nil {
+				p.logger.Error("Error locking user", "errors", err.Error())
+				return nil, errors.NewInternalServerError(
+					"Error authenticating user",
+					"",
+					errors.ErrorAuthenticatingUser,
+				).AppError
+			}
+		}
 		p.logger.Error("User is locked", "email", request.Email)
 		return nil, errors.NewUnauthorizedError(
-			"Email or password not exists",
+			"User is locked",
 			"",
 			errors.ErrorAuthenticatingUser,
 		).AppError
 	}
 	if !utils.ComparePasswords(result.Hash, request.Password) {
+		err := p.userRepository.IncrementBadLoginAttempts(result.ID)
+		if err != nil {
+			p.logger.Error("Error incrementing bad login attempts", "errors", err.Error())
+			return nil, errors.NewInternalServerError(
+				"Error authenticating user",
+				"",
+				errors.ErrorAuthenticatingUser,
+			).AppError
+		}
 		return nil, errors.NewUnauthorizedError(
 			"Email or password not exists",
 			"",

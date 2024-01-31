@@ -15,4 +15,6 @@ type Repository interface {
 	Update(user *auth.User) (*auth.User, error)
 	Delete(id string) error
 	FindUsersByEmails(emails []string) ([]auth.User, error)
+	IncrementBadLoginAttempts(id string) error
+	LockUser(id string) error
 }
