@@ -1,6 +1,7 @@
 package team
 
 import (
+	"errors"
 	"github.com/kimoscloud/user-management-service/internal/core/model/entity/organization"
 	types "github.com/kimoscloud/value-types/domain"
 	"gorm.io/gorm"
@@ -49,6 +50,18 @@ func (repo *RepositoryPostgres) GetByID(id string) (*organization.Team, error) {
 	}
 	return &team, nil
 }
+
+func (repo *RepositoryPostgres) GetByNameOrSlugAndOrgId(name string, slug string, organizationId string) ([]organization.Team, error) {
+	var teams []organization.Team
+	if err := repo.db.Where("organization_id = ?", organizationId).Where("name=? OR slug=?", name, slug).Find(&teams).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return []organization.Team{}, nil
+		}
+		return []organization.Team{}, err
+	}
+	return teams, nil
+}
+
 func (repo *RepositoryPostgres) Create(
 	team *organization.Team,
 	tx *gorm.DB,

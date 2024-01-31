@@ -15,11 +15,12 @@ import (
 )
 
 type CreateOrganizationMemberUseCase struct {
-	organizationRepository repository.Repository
-	userOrganizationRepo   userOrganizationRepository.Repository
-	roleRepo               roleRepository.Repository
-	userRepo               userRepository.Repository
-	logger                 logging.Logger
+	organizationRepository              repository.Repository
+	userOrganizationRepo                userOrganizationRepository.Repository
+	roleRepo                            roleRepository.Repository
+	userRepo                            userRepository.Repository
+	checkUserHasPermissionsToMakeAction *CheckUserHasPermissionsToMakeAction
+	logger                              logging.Logger
 }
 
 func NewCreateOrganizationMemberUseCase(
@@ -27,14 +28,16 @@ func NewCreateOrganizationMemberUseCase(
 	userOrganizationRepo userOrganizationRepository.Repository,
 	roleRepo roleRepository.Repository,
 	userRepo userRepository.Repository,
+	checkUserHasPermissionsToMakeAction *CheckUserHasPermissionsToMakeAction,
 	logger logging.Logger,
 ) *CreateOrganizationMemberUseCase {
 	return &CreateOrganizationMemberUseCase{
-		organizationRepository: organizationRepository,
-		userOrganizationRepo:   userOrganizationRepo,
-		userRepo:               userRepo,
-		roleRepo:               roleRepo,
-		logger:                 logger,
+		organizationRepository:              organizationRepository,
+		userOrganizationRepo:                userOrganizationRepo,
+		userRepo:                            userRepo,
+		roleRepo:                            roleRepo,
+		checkUserHasPermissionsToMakeAction: checkUserHasPermissionsToMakeAction,
+		logger:                              logger,
 	}
 }
 
@@ -44,26 +47,9 @@ func (cu CreateOrganizationMemberUseCase) Handler(
 ) *errors.AppError {
 	tx := cu.userOrganizationRepo.BeginTransaction()
 	defer tx.Rollback()
-	authenticatedOrgUser, err := cu.userOrganizationRepo.GetUserOrganizationByUserAndOrganizationWithRolesAndPermissions(
-		authenticatedUserId,
-		orgId,
-	)
-	if err != nil {
-		//TODO replace the error code here
-		return errors.NewInternalServerError(
-			"Error inviting user to the organization",
-			"Error searching the authenticated user",
-			"0000011",
-		).AppError
-	}
-	if !authenticatedOrgUser.CheckIfOrgUserHasPermissions(
-		[]string{domain.PERMISSION_ADD_ORGANIZATION_MEMBER},
-	) {
-		return errors2.NewForbiddenError(
-			"Error inviting user to the organization",
-			"User does not have permission to invite users",
-			errors2.ErrorUserCantAddUsersToOrganization,
-		).AppError
+	if !cu.checkUserHasPermissionsToMakeAction.Handler(authenticatedUserId, orgId, []string{domain.PERMISSION_ADD_ORGANIZATION_MEMBER}) {
+		return errors2.NewForbiddenError("The user don't have the privileges to do this operation",
+			"The user don't have the privileges to do this operation if the error persist, contact with your administrator or contact us support@kimos.cloud", "0000019").AppError
 	}
 	role, err := cu.roleRepo.GetRoleByIdAndOrgId(request.RoleId, orgId)
 	if err != nil {

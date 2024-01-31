@@ -17,6 +17,7 @@ type OrganizationController struct {
 	getOrganizationByOrgIdAndUserIdUseCase *usecase.GetOrganizationByOrgIAndUserIddUseCase
 	createOrganizationMemberUseCase        *usecase.CreateOrganizationMemberUseCase
 	removeOrganizationMemberUseCase        *usecase.RemoveOrganizationMemberUseCase
+	createTeamUseCase                      *usecase.CreateTeamUseCase
 	logger                                 logging.Logger
 }
 
@@ -28,6 +29,7 @@ func NewOrganizationController(
 	getOrganizationsByUserIdUseCase *usecase.GetOrganizationsByUserUseCase,
 	createOrganizationMemberUseCase *usecase.CreateOrganizationMemberUseCase,
 	removeOrganizationMemberUseCase *usecase.RemoveOrganizationMemberUseCase,
+	createTeamUseCase *usecase.CreateTeamUseCase,
 ) OrganizationController {
 	return OrganizationController{
 		gin:                                    gin,
@@ -37,6 +39,7 @@ func NewOrganizationController(
 		getOrganizationsByUserIdUseCase:        getOrganizationsByUserIdUseCase,
 		createOrganizationMemberUseCase:        createOrganizationMemberUseCase,
 		removeOrganizationMemberUseCase:        removeOrganizationMemberUseCase,
+		createTeamUseCase:                      createTeamUseCase,
 	}
 }
 
@@ -91,7 +94,18 @@ func (oc OrganizationController) getTeamsByOrganizationIdAndUser(c *gin.Context)
 }
 
 func (oc OrganizationController) createTeam(c *gin.Context) {
-	//TODO implement
+	userId := c.GetString("kimosUserId")
+	orgnanizationId := c.Param("orgId")
+	request, err := oc.parseCreateTeamRequest(c)
+	if err != nil {
+		c.AbortWithStatusJSON(
+			400, &gin.H{
+				"message": "Invalid request",
+			},
+		)
+		return
+	}
+	oc.createTeamUseCase.Handler(userId, orgnanizationId, request)
 }
 
 func (oc OrganizationController) getOrganizationMemberById(c *gin.Context) {
@@ -131,10 +145,11 @@ func (oc OrganizationController) createOrganizationMember(c *gin.Context) {
 }
 
 func (oc OrganizationController) updateOrganization(c *gin.Context) {
-	//TODO implement
+	//userId := c.GetString("kimosUserId")
 }
 
 func (oc OrganizationController) deleteOrganization(c *gin.Context) {
+	//userId := c.GetString("kimosUserId")
 	//TODO implement desactive organization and left a job to be runned
 }
 
@@ -197,6 +212,17 @@ func (oc OrganizationController) parseCreateOrganizationRequest(ctx *gin.Context
 	error,
 ) {
 	var request organizationRequest.CreateOrganizationRequest
+	err := ctx.ShouldBindJSON(&request)
+	if err != nil {
+		return nil, err
+	}
+	return &request, nil
+}
+
+func (oc OrganizationController) parseCreateTeamRequest(ctx *gin.Context) (
+	*organizationRequest.CreateTeamRequest,
+	error) {
+	var request organizationRequest.CreateTeamRequest
 	err := ctx.ShouldBindJSON(&request)
 	if err != nil {
 		return nil, err

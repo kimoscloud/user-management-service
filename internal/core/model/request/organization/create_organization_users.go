@@ -1,6 +1,6 @@
 package organization
 
 type CreateOrganizationUsers struct {
-	Emails []string
-	RoleId string
+	Emails []string `json:"emails"`
+	RoleId string   `json:"roleId"`
 }
