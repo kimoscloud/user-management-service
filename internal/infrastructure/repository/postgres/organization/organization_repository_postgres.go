@@ -2,6 +2,7 @@ package organization
 
 import (
 	"github.com/kimoscloud/user-management-service/internal/core/model/entity/organization"
+	organization2 "github.com/kimoscloud/user-management-service/internal/core/ports/repository/organization"
 	types "github.com/kimoscloud/value-types/domain"
 	"gorm.io/gorm"
 )
@@ -10,7 +11,7 @@ type RepositoryPostgres struct {
 	db *gorm.DB
 }
 
-func NewOrganizationRepository(db *gorm.DB) *RepositoryPostgres {
+func NewOrganizationRepository(db *gorm.DB) organization2.Repository {
 	return &RepositoryPostgres{db: db}
 }
 

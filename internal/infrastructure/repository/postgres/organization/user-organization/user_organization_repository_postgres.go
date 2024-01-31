@@ -86,6 +86,21 @@ func (repo *RepositoryPostgres) CreateUserOrganizations(
 	}
 	return nil
 }
+
+func (repo *RepositoryPostgres) GetUserOrganizationsByUserIdsAndOrganizationIdIgnoreDeletedAt(
+	userIds []string,
+	orgIds string,
+) ([]organization.UserOrganization, error) {
+	var userOrganizations []organization.UserOrganization
+	if err := repo.db.Unscoped().Where(
+		"user_id IN ? AND organization_id = ?",
+		userIds,
+		orgIds,
+	).Find(&userOrganizations).Error; err != nil {
+		return nil, err
+	}
+	return userOrganizations, nil
+}
 func (repo *RepositoryPostgres) Create(
 	userOrganization *organization.UserOrganization,
 	tx *gorm.DB,
@@ -101,6 +116,20 @@ func (repo *RepositoryPostgres) Create(
 	}
 	return userOrganization, nil
 }
+
+func (repo *RepositoryPostgres) RestoreUserOrganizations(restored []string, tx *gorm.DB) error {
+	if tx == nil {
+		tx = repo.db
+	}
+	if err := tx.Model(&organization.UserOrganization{}).Unscoped().Where(
+		"id IN ?",
+		restored,
+	).Update("deleted_at", nil).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func (repo *RepositoryPostgres) Update(userOrganization *organization.UserOrganization) (
 	*organization.UserOrganization,
 	error,

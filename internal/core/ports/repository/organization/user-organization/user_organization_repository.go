@@ -24,4 +24,9 @@ type Repository interface {
 	Delete(id string) error
 	DeleteByOrganizationIdAndUserId(organizationId string, userId string) error
 	BeginTransaction() *gorm.DB
+	GetUserOrganizationsByUserIdsAndOrganizationIdIgnoreDeletedAt(
+		ids []string,
+		id string,
+	) ([]organization.UserOrganization, error)
+	RestoreUserOrganizations(restored []string, tx *gorm.DB) error
 }

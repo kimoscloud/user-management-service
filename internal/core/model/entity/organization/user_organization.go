@@ -28,7 +28,7 @@ func (o UserOrganization) hasPermission(permission string) bool {
 		return false
 	}
 	for _, p := range o.Role.Permissions {
-		if p.InternalName == permission {
+		if p.ID == permission {
 			return true
 		}
 	}

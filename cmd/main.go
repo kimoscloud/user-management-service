@@ -5,20 +5,22 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/kimoscloud/user-management-service/internal/controller"
 	logging2 "github.com/kimoscloud/user-management-service/internal/core/ports/logging"
+	organizationRepository "github.com/kimoscloud/user-management-service/internal/core/ports/repository/organization"
+	userRepository "github.com/kimoscloud/user-management-service/internal/core/ports/repository/user"
 	"github.com/kimoscloud/user-management-service/internal/core/usecase/organization"
 	"github.com/kimoscloud/user-management-service/internal/core/usecase/user"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/configuration"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/db"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/logging"
-	organizationRepository "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/organization"
-	roleRepository "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/organization/role"
-	teamRepository "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/organization/team"
-	teamMemberRepository "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/organization/team-member"
-	userOrganizationRepository "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/organization/user-organization"
-	projectRepository "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/project"
-	teamProjectRepository "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/project/team-project"
-	userProjectRepository "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/project/user-project"
-	user2 "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/user"
+	organizationRepositoryPostgres "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/organization"
+	roleRepositoryPostgres "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/organization/role"
+	teamRepositoryPostgres "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/organization/team"
+	teamMemberRepositoryPostgres "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/organization/team-member"
+	userOrganizationRepositoryPostgres "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/organization/user-organization"
+	projectRepositoryPostgres "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/project"
+	teamProjectRepositoryPostgres "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/project/team-project"
+	userProjectRepositoryPostgres "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/project/user-project"
+	userRepositoryPostgres "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/user"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/server"
 	"log"
 	"os"
@@ -45,15 +47,15 @@ func main() {
 		log.Fatalf("failed to new logger err=%s\n", err.Error())
 	}
 	// Create the UserRepository
-	userRepo := user2.NewUserRepository(conn)
-	orgRepo := organizationRepository.NewOrganizationRepository(conn)
-	userOrgRepo := userOrganizationRepository.NewUserOrganizationRepository(conn)
-	roleRepo := roleRepository.NewRoleRepository(conn)
-	teamRepo := teamRepository.NewTeamRepository(conn)
-	teamMemberRepo := teamMemberRepository.NewTeamMemberRepository(conn)
-	projectRepo := projectRepository.NewProjectRepository(conn)
-	userProjectRepo := userProjectRepository.NewUserProjectRepository(conn)
-	teamProjectRepo := teamProjectRepository.NewTeamProjectRepository(conn)
+	userRepo := userRepositoryPostgres.NewUserRepository(conn)
+	orgRepo := organizationRepositoryPostgres.NewOrganizationRepository(conn)
+	userOrgRepo := userOrganizationRepositoryPostgres.NewUserOrganizationRepository(conn)
+	roleRepo := roleRepositoryPostgres.NewRoleRepository(conn)
+	teamRepo := teamRepositoryPostgres.NewTeamRepository(conn)
+	teamMemberRepo := teamMemberRepositoryPostgres.NewTeamMemberRepository(conn)
+	projectRepo := projectRepositoryPostgres.NewProjectRepository(conn)
+	userProjectRepo := userProjectRepositoryPostgres.NewUserProjectRepository(conn)
+	teamProjectRepo := teamProjectRepositoryPostgres.NewTeamProjectRepository(conn)
 
 	initUserController(instance, userRepo, logger)
 	initOrganizationController(
@@ -63,6 +65,7 @@ func main() {
 		roleRepo,
 		teamRepo,
 		teamMemberRepo,
+		userRepo,
 		logger,
 	)
 	initProjectController(
@@ -101,12 +104,12 @@ func main() {
 // TODO use interfaces here
 func initProjectController(
 	instance *gin.Engine,
-	projectRepo *projectRepository.RepositoryPostgres,
-	userProjectRepo *userProjectRepository.RepositoryPostgres,
-	teamProjectRepo *teamProjectRepository.RepositoryPostgres,
-	roleRepo *roleRepository.RepositoryPostgres,
-	userRepo *user2.RepositoryPostgres,
-	teamRepo *teamRepository.RepositoryPostgres,
+	projectRepo *projectRepositoryPostgres.RepositoryPostgres,
+	userProjectRepo *userProjectRepositoryPostgres.RepositoryPostgres,
+	teamProjectRepo *teamProjectRepositoryPostgres.RepositoryPostgres,
+	roleRepo *roleRepositoryPostgres.RepositoryPostgres,
+	userRepo userRepository.Repository,
+	teamRepo *teamRepositoryPostgres.RepositoryPostgres,
 	logger logging2.Logger,
 ) {
 
@@ -115,11 +118,12 @@ func initProjectController(
 // TODO use interfaces here
 func initOrganizationController(
 	instance *gin.Engine,
-	orgRepo *organizationRepository.RepositoryPostgres,
-	userOrgRepo *userOrganizationRepository.RepositoryPostgres,
-	roleRepo *roleRepository.RepositoryPostgres,
-	teamRepo *teamRepository.RepositoryPostgres,
-	teamMemberRepo *teamMemberRepository.RepositoryPostgres,
+	orgRepo organizationRepository.Repository,
+	userOrgRepo *userOrganizationRepositoryPostgres.RepositoryPostgres,
+	roleRepo *roleRepositoryPostgres.RepositoryPostgres,
+	teamRepo *teamRepositoryPostgres.RepositoryPostgres,
+	teamMemberRepo *teamMemberRepositoryPostgres.RepositoryPostgres,
+	userRepo userRepository.Repository,
 	logger logging2.Logger,
 ) {
 	createOrganizationUseCase := organization.NewCreateOrganizationUseCase(
@@ -140,6 +144,7 @@ func initOrganizationController(
 		orgRepo,
 		userOrgRepo,
 		roleRepo,
+		userRepo,
 		logger,
 	)
 	organizationController := controller.NewOrganizationController(
@@ -156,7 +161,7 @@ func initOrganizationController(
 // TODO use interfaces here`
 func initUserController(
 	instance *gin.Engine,
-	userRepo *user2.RepositoryPostgres,
+	userRepo userRepository.Repository,
 	logger logging2.Logger,
 ) {
 	createUserUseCase := user.NewCreateUserUseCase(userRepo, logger)
