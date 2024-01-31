@@ -183,6 +183,24 @@ func (repo *RepositoryPostgres) DeleteByOrganizationIdAndUserId(
 	return nil
 }
 
+func (repo *RepositoryPostgres) RemoveUserFromOrganization(
+	organizationUserId string,
+	orgId string,
+	tx *gorm.DB,
+) error {
+	if tx == nil {
+		tx = repo.db
+	}
+	if err := tx.Where(
+		"id = ? AND organization_id = ?",
+		organizationUserId,
+		orgId,
+	).Delete(&organization.UserOrganization{}).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func (repo *RepositoryPostgres) BeginTransaction() *gorm.DB {
 	return repo.db.Begin()
 }

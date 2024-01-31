@@ -62,7 +62,7 @@ func (cu CreateOrganizationMemberUseCase) Handler(
 		return errors2.NewForbiddenError(
 			"Error inviting user to the organization",
 			"User does not have permission to invite users",
-			errors2.ErrorUserItsNotAnAdmin,
+			errors2.ErrorUserCantAddUsersToOrganization,
 		).AppError
 	}
 	role, err := cu.roleRepo.GetRoleByIdAndOrgId(request.RoleId, orgId)

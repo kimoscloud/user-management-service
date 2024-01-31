@@ -16,6 +16,7 @@ type OrganizationController struct {
 	getOrganizationsByUserIdUseCase        *usecase.GetOrganizationsByUserUseCase
 	getOrganizationByOrgIdAndUserIdUseCase *usecase.GetOrganizationByOrgIAndUserIddUseCase
 	createOrganizationMemberUseCase        *usecase.CreateOrganizationMemberUseCase
+	removeOrganizationMemberUseCase        *usecase.RemoveOrganizationMemberUseCase
 	logger                                 logging.Logger
 }
 
@@ -26,6 +27,7 @@ func NewOrganizationController(
 	getOrganizationByOrgIdAndUserIdUseCase *usecase.GetOrganizationByOrgIAndUserIddUseCase,
 	getOrganizationsByUserIdUseCase *usecase.GetOrganizationsByUserUseCase,
 	createOrganizationMemberUseCase *usecase.CreateOrganizationMemberUseCase,
+	removeOrganizationMemberUseCase *usecase.RemoveOrganizationMemberUseCase,
 ) OrganizationController {
 	return OrganizationController{
 		gin:                                    gin,
@@ -34,6 +36,7 @@ func NewOrganizationController(
 		getOrganizationByOrgIdAndUserIdUseCase: getOrganizationByOrgIdAndUserIdUseCase,
 		getOrganizationsByUserIdUseCase:        getOrganizationsByUserIdUseCase,
 		createOrganizationMemberUseCase:        createOrganizationMemberUseCase,
+		removeOrganizationMemberUseCase:        removeOrganizationMemberUseCase,
 	}
 }
 
@@ -96,7 +99,8 @@ func (oc OrganizationController) getOrganizationMemberById(c *gin.Context) {
 }
 
 func (oc OrganizationController) removeOrganizationMember(c *gin.Context) {
-	//TODO implement
+
+	oc.removeOrganizationMemberUseCase.Handler()
 }
 
 func (oc OrganizationController) createOrganizationMember(c *gin.Context) {
