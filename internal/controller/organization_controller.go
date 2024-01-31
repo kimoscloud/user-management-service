@@ -99,8 +99,15 @@ func (oc OrganizationController) getOrganizationMemberById(c *gin.Context) {
 }
 
 func (oc OrganizationController) removeOrganizationMember(c *gin.Context) {
-
-	oc.removeOrganizationMemberUseCase.Handler()
+	userId := c.GetString("kimosUserId")
+	orgId := c.Param("orgId")
+	memberId := c.Param("memberId")
+	appErr := oc.removeOrganizationMemberUseCase.Handler(userId, orgId, memberId)
+	if appErr != nil {
+		c.AbortWithStatusJSON(appErr.HTTPStatus, appErr)
+		return
+	}
+	c.Status(http.StatusCreated)
 }
 
 func (oc OrganizationController) createOrganizationMember(c *gin.Context) {

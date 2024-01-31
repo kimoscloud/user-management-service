@@ -6,6 +6,7 @@ import (
 	"github.com/kimoscloud/user-management-service/internal/controller"
 	logging2 "github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	organizationRepository "github.com/kimoscloud/user-management-service/internal/core/ports/repository/organization"
+	userOrganizationRepository "github.com/kimoscloud/user-management-service/internal/core/ports/repository/organization/user-organization"
 	userRepository "github.com/kimoscloud/user-management-service/internal/core/ports/repository/user"
 	"github.com/kimoscloud/user-management-service/internal/core/usecase/organization"
 	"github.com/kimoscloud/user-management-service/internal/core/usecase/user"
@@ -119,7 +120,7 @@ func initProjectController(
 func initOrganizationController(
 	instance *gin.Engine,
 	orgRepo organizationRepository.Repository,
-	userOrgRepo *userOrganizationRepositoryPostgres.RepositoryPostgres,
+	userOrgRepo userOrganizationRepository.Repository,
 	roleRepo *roleRepositoryPostgres.RepositoryPostgres,
 	teamRepo *teamRepositoryPostgres.RepositoryPostgres,
 	teamMemberRepo *teamMemberRepositoryPostgres.RepositoryPostgres,
@@ -147,6 +148,12 @@ func initOrganizationController(
 		userRepo,
 		logger,
 	)
+	removeOrganizationUserUseCase := organization.NewRemoveOrganizationMemberUseCase(
+		orgRepo,
+		userOrgRepo,
+		logger,
+	)
+
 	organizationController := controller.NewOrganizationController(
 		instance,
 		logger,
@@ -154,6 +161,7 @@ func initOrganizationController(
 		getOrgByUserIdAndOrgIdUseCase,
 		getOrganizationsByUserIdUseCase,
 		createOrganizationUserUseCase,
+		removeOrganizationUserUseCase,
 	)
 	organizationController.InitRouter()
 }

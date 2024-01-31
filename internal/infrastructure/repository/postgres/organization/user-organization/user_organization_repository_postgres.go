@@ -2,6 +2,7 @@ package user_organization
 
 import (
 	"github.com/kimoscloud/user-management-service/internal/core/model/entity/organization"
+	repository "github.com/kimoscloud/user-management-service/internal/core/ports/repository/organization/user-organization"
 	types "github.com/kimoscloud/value-types/domain"
 	"gorm.io/gorm"
 )
@@ -10,7 +11,7 @@ type RepositoryPostgres struct {
 	db *gorm.DB
 }
 
-func NewUserOrganizationRepository(db *gorm.DB) *RepositoryPostgres {
+func NewUserOrganizationRepository(db *gorm.DB) repository.Repository {
 	return &RepositoryPostgres{db: db}
 }
 
@@ -170,7 +171,7 @@ func (repo *RepositoryPostgres) DeleteByOrganizationId(organizationId string) er
 }
 
 func (repo *RepositoryPostgres) DeleteByOrganizationIdAndUserId(
-	organizationId string,
+	organizationId,
 	userId string,
 ) error {
 	if err := repo.db.Where(
@@ -184,7 +185,7 @@ func (repo *RepositoryPostgres) DeleteByOrganizationIdAndUserId(
 }
 
 func (repo *RepositoryPostgres) RemoveUserFromOrganization(
-	organizationUserId string,
+	organizationUserId,
 	orgId string,
 	tx *gorm.DB,
 ) error {

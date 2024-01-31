@@ -29,5 +29,5 @@ type Repository interface {
 		id string,
 	) ([]organization.UserOrganization, error)
 	RestoreUserOrganizations(restored []string, tx *gorm.DB) error
-	RemoveUserFromOrganization(id string, id2 string) error
+	RemoveUserFromOrganization(id, id2 string, tx *gorm.DB) error
 }
