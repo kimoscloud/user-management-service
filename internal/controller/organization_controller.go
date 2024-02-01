@@ -30,6 +30,7 @@ func NewOrganizationController(
 	createOrganizationMemberUseCase *usecase.CreateOrganizationMemberUseCase,
 	removeOrganizationMemberUseCase *usecase.RemoveOrganizationMemberUseCase,
 	createTeamUseCase *usecase.CreateTeamUseCase,
+	aadMemberToTeamUseCase *usecase.AddTeamMembersUseCase,
 ) OrganizationController {
 	return OrganizationController{
 		gin:                                    gin,
@@ -40,6 +41,7 @@ func NewOrganizationController(
 		createOrganizationMemberUseCase:        createOrganizationMemberUseCase,
 		removeOrganizationMemberUseCase:        removeOrganizationMemberUseCase,
 		createTeamUseCase:                      createTeamUseCase,
+		aadMemberToTeamUseCase:                 aadMemberToTeamUseCase,
 	}
 }
 
@@ -105,7 +107,12 @@ func (oc OrganizationController) createTeam(c *gin.Context) {
 		)
 		return
 	}
-	oc.createTeamUseCase.Handler(userId, orgnanizationId, request)
+	team, appErr := oc.createTeamUseCase.Handler(userId, orgnanizationId, request)
+	if appErr != nil {
+		c.AbortWithStatusJSON(appErr.HTTPStatus, appErr)
+		return
+	}
+	c.JSON(http.StatusCreated, team)
 }
 
 func (oc OrganizationController) getOrganizationMemberById(c *gin.Context) {
