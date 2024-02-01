@@ -141,11 +141,17 @@ func initOrganizationController(
 		orgRepo,
 		logger,
 	)
+
+	checkIfUserHasEnoughPermissionsUseCase := organization.NewCheckUserHasPermissionsToMakeAction(
+		userOrgRepo,
+		logger)
+
 	createOrganizationUserUseCase := organization.NewCreateOrganizationMemberUseCase(
 		orgRepo,
 		userOrgRepo,
 		roleRepo,
 		userRepo,
+		checkIfUserHasEnoughPermissionsUseCase,
 		logger,
 	)
 	removeOrganizationUserUseCase := organization.NewRemoveOrganizationMemberUseCase(
@@ -153,6 +159,20 @@ func initOrganizationController(
 		userOrgRepo,
 		logger,
 	)
+
+	createTeamUsecase := organization.NewCreateTeamUseCase(
+		userOrgRepo,
+		teamRepo,
+		teamMemberRepo,
+		checkIfUserHasEnoughPermissionsUseCase,
+		logger)
+
+	addMemberToTeamUseCase := organization.NewAddTeamMembersUseCase(
+		userOrgRepo,
+		teamRepo,
+		teamMemberRepo,
+		checkIfUserHasEnoughPermissionsUseCase,
+		logger)
 
 	organizationController := controller.NewOrganizationController(
 		instance,
@@ -162,6 +182,8 @@ func initOrganizationController(
 		getOrganizationsByUserIdUseCase,
 		createOrganizationUserUseCase,
 		removeOrganizationUserUseCase,
+		createTeamUsecase,
+		addMemberToTeamUseCase,
 	)
 	organizationController.InitRouter()
 }

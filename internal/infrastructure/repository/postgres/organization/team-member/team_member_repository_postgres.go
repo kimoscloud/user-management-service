@@ -21,6 +21,36 @@ func (r *RepositoryPostgres) GetAllByTeamId(teamId string) ([]organization.TeamM
 	return teamMembers, nil
 }
 
+func (r *RepositoryPostgres) GetAllByUserId(userId string, orgId string) ([]organization.TeamMember, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *RepositoryPostgres) GetByTeamIdAndUserId(teamId string, userId string) (*organization.TeamMember, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *RepositoryPostgres) Create(teamMember *organization.TeamMember, tx *gorm.DB) (*organization.TeamMember, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *RepositoryPostgres) Update(teamMember *organization.TeamMember, tx *gorm.DB) (*organization.TeamMember, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *RepositoryPostgres) DeleteByTeamIdAndUserId(teamId string, userId string, tx *gorm.DB) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (r *RepositoryPostgres) Delete(id string, tx *gorm.DB) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (r *RepositoryPostgres) BeginTransaction() *gorm.DB {
 	return r.db.Begin()
 }

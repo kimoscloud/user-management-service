@@ -17,7 +17,7 @@ type CreateTeamUseCase struct {
 	userOrganizationRepo          userOrganizationRepository.Repository
 	teamRepo                      teamRepository.Repository
 	teamMemberRepository          teamMemberRepository.Repository
-	checkUserHasPermissionUseCase CheckUserHasPermissionsToMakeAction
+	checkUserHasPermissionUseCase *CheckUserHasPermissionsToMakeAction
 	logger                        logging.Logger
 }
 
@@ -25,7 +25,7 @@ func NewCreateTeamUseCase(
 	userOrganizationRepo userOrganizationRepository.Repository,
 	teamRepo teamRepository.Repository,
 	teamMemberRepository teamMemberRepository.Repository,
-	checkUserHasPermissionUseCase CheckUserHasPermissionsToMakeAction,
+	checkUserHasPermissionUseCase *CheckUserHasPermissionsToMakeAction,
 	logger logging.Logger) *CreateTeamUseCase {
 	return &CreateTeamUseCase{
 		userOrganizationRepo:          userOrganizationRepo,

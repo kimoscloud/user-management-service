@@ -18,6 +18,7 @@ type OrganizationController struct {
 	createOrganizationMemberUseCase        *usecase.CreateOrganizationMemberUseCase
 	removeOrganizationMemberUseCase        *usecase.RemoveOrganizationMemberUseCase
 	createTeamUseCase                      *usecase.CreateTeamUseCase
+	addMemberToTeamUseCase                 *usecase.AddTeamMembersUseCase
 	logger                                 logging.Logger
 }
 
@@ -30,7 +31,7 @@ func NewOrganizationController(
 	createOrganizationMemberUseCase *usecase.CreateOrganizationMemberUseCase,
 	removeOrganizationMemberUseCase *usecase.RemoveOrganizationMemberUseCase,
 	createTeamUseCase *usecase.CreateTeamUseCase,
-	aadMemberToTeamUseCase *usecase.AddTeamMembersUseCase,
+	addMemberToTeamUseCase *usecase.AddTeamMembersUseCase,
 ) OrganizationController {
 	return OrganizationController{
 		gin:                                    gin,
@@ -41,7 +42,7 @@ func NewOrganizationController(
 		createOrganizationMemberUseCase:        createOrganizationMemberUseCase,
 		removeOrganizationMemberUseCase:        removeOrganizationMemberUseCase,
 		createTeamUseCase:                      createTeamUseCase,
-		aadMemberToTeamUseCase:                 aadMemberToTeamUseCase,
+		addMemberToTeamUseCase:                 addMemberToTeamUseCase,
 	}
 }
 
