@@ -30,4 +30,8 @@ type Repository interface {
 	) ([]organization.UserOrganization, error)
 	RestoreUserOrganizations(restored []string, tx *gorm.DB) error
 	RemoveUserFromOrganization(id, id2 string, tx *gorm.DB) error
+	GetOrganizationMembersPaged(orgId, search string, pageNumber, pageSize int) (
+		types.Page[organization.UserOrganization],
+		error,
+	)
 }

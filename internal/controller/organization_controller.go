@@ -6,6 +6,7 @@ import (
 	organizationResponse "github.com/kimoscloud/user-management-service/internal/core/model/response/organization"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	usecase "github.com/kimoscloud/user-management-service/internal/core/usecase/organization"
+	"github.com/kimoscloud/user-management-service/internal/core/utils"
 	"github.com/kimoscloud/user-management-service/internal/middleware"
 	"net/http"
 )
@@ -19,6 +20,7 @@ type OrganizationController struct {
 	removeOrganizationMemberUseCase        *usecase.RemoveOrganizationMemberUseCase
 	createTeamUseCase                      *usecase.CreateTeamUseCase
 	addMemberToTeamUseCase                 *usecase.AddTeamMembersUseCase
+	getOrganizationMembersPagedUseCase     *usecase.GetOrganizationMembersPagedUseCase
 	logger                                 logging.Logger
 }
 
@@ -28,6 +30,7 @@ func NewOrganizationController(
 	createOrganizationUseCase *usecase.CreateOrganizationUseCase,
 	getOrganizationByOrgIdAndUserIdUseCase *usecase.GetOrganizationByOrgIAndUserIddUseCase,
 	getOrganizationsByUserIdUseCase *usecase.GetOrganizationsByUserUseCase,
+	getOrganizationMembersPagedUseCase *usecase.GetOrganizationMembersPagedUseCase,
 	createOrganizationMemberUseCase *usecase.CreateOrganizationMemberUseCase,
 	removeOrganizationMemberUseCase *usecase.RemoveOrganizationMemberUseCase,
 	createTeamUseCase *usecase.CreateTeamUseCase,
@@ -42,6 +45,7 @@ func NewOrganizationController(
 		createOrganizationMemberUseCase:        createOrganizationMemberUseCase,
 		removeOrganizationMemberUseCase:        removeOrganizationMemberUseCase,
 		createTeamUseCase:                      createTeamUseCase,
+		getOrganizationMembersPagedUseCase:     getOrganizationMembersPagedUseCase,
 		addMemberToTeamUseCase:                 addMemberToTeamUseCase,
 	}
 }
@@ -60,6 +64,7 @@ func (oc OrganizationController) InitRouter() {
 	api.GET("/:orgId/members/:memberId", oc.getOrganizationMemberById)
 	api.DELETE("/:orgId/members/:memberId", oc.removeOrganizationMember)
 	api.POST("/:orgId/members", oc.createOrganizationMember)
+	api.POST("/:orgId/members", oc.getOrganizationMembersPage)
 	//TODO implement billing methods
 	api.PUT("/:orgId", oc.updateOrganization)
 	api.DELETE("/:orgId", oc.deleteOrganization)
@@ -118,6 +123,30 @@ func (oc OrganizationController) createTeam(c *gin.Context) {
 
 func (oc OrganizationController) getOrganizationMemberById(c *gin.Context) {
 	//TODO implement
+}
+
+func (oc OrganizationController) getOrganizationMembersPage(c *gin.Context) {
+	userId := c.GetString("kimosUserId")
+	orgId := c.Param("orgId")
+	search := c.Query("search")
+	page, size, err := utils.GetPageParams(c, 0, 10)
+	if err != nil {
+		oc.logger.Error("Error getting page params", "error", err.Error())
+		c.AbortWithStatusJSON(
+			400, &gin.H{
+				"message": "Invalid page or size input",
+			},
+		)
+		return
+	}
+	result, appError := oc.getOrganizationMembersPagedUseCase.Handler(
+		userId, orgId, search, page, size,
+	)
+	if appError != nil {
+		c.AbortWithStatusJSON(appError.HTTPStatus, appError)
+		return
+	}
+	c.JSON(http.StatusOK, result)
 }
 
 func (oc OrganizationController) removeOrganizationMember(c *gin.Context) {
@@ -229,7 +258,8 @@ func (oc OrganizationController) parseCreateOrganizationRequest(ctx *gin.Context
 
 func (oc OrganizationController) parseCreateTeamRequest(ctx *gin.Context) (
 	*organizationRequest.CreateTeamRequest,
-	error) {
+	error,
+) {
 	var request organizationRequest.CreateTeamRequest
 	err := ctx.ShouldBindJSON(&request)
 	if err != nil {

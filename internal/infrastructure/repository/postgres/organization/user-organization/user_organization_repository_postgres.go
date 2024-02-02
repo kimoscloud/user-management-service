@@ -88,6 +88,16 @@ func (repo *RepositoryPostgres) CreateUserOrganizations(
 	return nil
 }
 
+func (repo *RepositoryPostgres) GetOrganizationMembersPaged(
+	orgId, search string, pageNumber,
+	pageSize int,
+) (
+	types.Page[organization.UserOrganization],
+	error,
+) {
+
+}
+
 func (repo *RepositoryPostgres) GetUserOrganizationsByUserIdsAndOrganizationIdIgnoreDeletedAt(
 	userIds []string,
 	orgIds string,
