@@ -1,20 +1,20 @@
-package user
+package usecase
 
 import (
 	errors2 "github.com/kimoscloud/user-management-service/internal/core/errors"
 	"github.com/kimoscloud/user-management-service/internal/core/model/response"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
-	"github.com/kimoscloud/user-management-service/internal/core/ports/repository/user"
+	"github.com/kimoscloud/user-management-service/internal/core/ports/repository"
 	"github.com/kimoscloud/value-types/errors"
 )
 
 type GetUserUseCase struct {
-	userRepository user.Repository
+	userRepository repository.Repository
 	logger         logging.Logger
 }
 
 func NewGetUserUseCase(
-	ur user.Repository,
+	ur repository.Repository,
 	logger logging.Logger,
 ) *GetUserUseCase {
 	return &GetUserUseCase{userRepository: ur, logger: logger}

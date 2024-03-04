@@ -1,9 +1,9 @@
-package user
+package usecase
 
 import (
 	"github.com/kimoscloud/user-management-service/internal/core/model/entity/auth"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
-	userRepository "github.com/kimoscloud/user-management-service/internal/core/ports/repository/user"
+	userRepository "github.com/kimoscloud/user-management-service/internal/core/ports/repository"
 	"github.com/kimoscloud/value-types/errors"
 )
 

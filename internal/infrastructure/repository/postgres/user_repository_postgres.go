@@ -1,9 +1,9 @@
-package user
+package postgres
 
 import (
 	"errors"
 	"github.com/kimoscloud/user-management-service/internal/core/model/entity/auth"
-	"github.com/kimoscloud/user-management-service/internal/core/ports/repository/user"
+	"github.com/kimoscloud/user-management-service/internal/core/ports/repository"
 	types "github.com/kimoscloud/value-types/domain"
 	"gorm.io/gorm"
 )
@@ -12,7 +12,7 @@ type RepositoryPostgres struct {
 	db *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) user.Repository {
+func NewUserRepository(db *gorm.DB) repository.Repository {
 	return &RepositoryPostgres{db: db}
 }
 

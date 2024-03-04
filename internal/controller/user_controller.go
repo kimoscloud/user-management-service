@@ -5,29 +5,29 @@ import (
 	"github.com/kimoscloud/user-management-service/internal/core/model/request"
 	"github.com/kimoscloud/user-management-service/internal/core/model/request/auth"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
-	"github.com/kimoscloud/user-management-service/internal/core/usecase/user"
+	"github.com/kimoscloud/user-management-service/internal/core/usecase"
 	"github.com/kimoscloud/user-management-service/internal/middleware"
 	"net/http"
 )
 
 type UserController struct {
 	gin                      *gin.Engine
-	createUserUseCase        *user.CreateUserUseCase
-	authenticateUserUseCase  *user.AuthenticateUserUseCase
-	getUserUseCase           *user.GetUserUseCase
-	updateUserProfileUseCase *user.UpdateUserProfileUseCase
-	changePasswordUseCase    *user.ChangePasswordUseCase
+	createUserUseCase        *usecase.CreateUserUseCase
+	authenticateUserUseCase  *usecase.AuthenticateUserUseCase
+	getUserUseCase           *usecase.GetUserUseCase
+	updateUserProfileUseCase *usecase.UpdateUserProfileUseCase
+	changePasswordUseCase    *usecase.ChangePasswordUseCase
 	logger                   logging.Logger
 }
 
 func NewUserController(
 	gin *gin.Engine,
 	logger logging.Logger,
-	createUserUseCase *user.CreateUserUseCase,
-	authenticateUserUseCase *user.AuthenticateUserUseCase,
-	getUserUseCase *user.GetUserUseCase,
-	updateUserProfileUseCase *user.UpdateUserProfileUseCase,
-	changePasswordUseCase *user.ChangePasswordUseCase,
+	createUserUseCase *usecase.CreateUserUseCase,
+	authenticateUserUseCase *usecase.AuthenticateUserUseCase,
+	getUserUseCase *usecase.GetUserUseCase,
+	updateUserProfileUseCase *usecase.UpdateUserProfileUseCase,
+	changePasswordUseCase *usecase.ChangePasswordUseCase,
 ) UserController {
 	return UserController{
 		gin:                      gin,

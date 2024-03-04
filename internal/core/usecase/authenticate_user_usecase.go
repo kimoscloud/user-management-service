@@ -1,23 +1,23 @@
-package user
+package usecase
 
 import (
 	"github.com/kimoscloud/user-management-service/internal/core/auth"
 	auth2 "github.com/kimoscloud/user-management-service/internal/core/model/request/auth"
 	"github.com/kimoscloud/user-management-service/internal/core/model/response"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
-	"github.com/kimoscloud/user-management-service/internal/core/ports/repository/user"
+	"github.com/kimoscloud/user-management-service/internal/core/ports/repository"
 	"github.com/kimoscloud/user-management-service/internal/core/utils"
 	"github.com/kimoscloud/value-types/errors"
 	"time"
 )
 
 type AuthenticateUserUseCase struct {
-	userRepository user.Repository
+	userRepository repository.Repository
 	logger         logging.Logger
 }
 
 func NewAuthenticateUserUseCase(
-	ur user.Repository,
+	ur repository.Repository,
 	logger logging.Logger,
 ) *AuthenticateUserUseCase {
 	return &AuthenticateUserUseCase{userRepository: ur, logger: logger}

@@ -1,4 +1,4 @@
-package user
+package repository
 
 import (
 	"github.com/kimoscloud/user-management-service/internal/core/model/entity/auth"
