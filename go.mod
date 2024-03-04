@@ -7,7 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/joho/godotenv v1.5.1
-	github.com/kimoscloud/value-types v0.0.8
+	github.com/kimoscloud/value-types v0.0.11
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/crypto v0.9.0
 	gorm.io/driver/postgres v1.5.2

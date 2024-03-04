@@ -2,12 +2,14 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	auth2 "github.com/kimoscloud/user-management-service/internal/core/auth"
 	"github.com/kimoscloud/user-management-service/internal/core/model/request"
 	"github.com/kimoscloud/user-management-service/internal/core/model/request/auth"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	"github.com/kimoscloud/user-management-service/internal/core/usecase"
 	"github.com/kimoscloud/user-management-service/internal/middleware"
 	"net/http"
+	"strings"
 )
 
 type UserController struct {
@@ -44,6 +46,7 @@ func (u UserController) InitRouter() {
 	api := u.gin.Group("/api/v1/user")
 	api.POST("/signup", u.signUp)
 	api.POST("/login", u.login)
+	api.GET("/validate-token", u.validateToken)
 	secured := api.Group("", middleware.Auth())
 	{
 		secured.GET("/me", u.me)
@@ -69,6 +72,44 @@ func (u UserController) login(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, result)
 	return
+}
+
+// validateController validates the user controller by retrieving the user ID from the request context
+// and returning it in the JSON response.
+func (u UserController) validateToken(c *gin.Context) {
+	tokenString := c.GetHeader("Authorization")
+	if tokenString == "" {
+		c.AbortWithStatusJSON(
+			401, gin.H{
+				"message": "Unauthorized",
+			},
+		)
+		c.Abort()
+		return
+	}
+	authorizationHeaderSplitted := strings.Split(tokenString, "Bearer ")
+	if len(authorizationHeaderSplitted) != 2 {
+		c.AbortWithStatusJSON(
+			401, gin.H{
+				"message": "Invalid token",
+			},
+		)
+		c.Abort()
+		return
+	}
+	claims, err := auth2.ValidateToken(
+		authorizationHeaderSplitted[1],
+	)
+	if err != nil {
+		c.AbortWithStatusJSON(
+			401, gin.H{
+				"message": "Unauthorized",
+			},
+		)
+		c.Abort()
+		return
+	}
+	c.JSON(http.StatusOK, claims)
 }
 
 func (u UserController) changePassword(c *gin.Context) {

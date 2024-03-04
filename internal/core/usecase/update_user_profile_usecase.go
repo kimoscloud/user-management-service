@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	errors2 "github.com/kimoscloud/user-management-service/internal/core/errors"
 	"github.com/kimoscloud/user-management-service/internal/core/model/request/auth"
 	"github.com/kimoscloud/user-management-service/internal/core/model/response"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
@@ -31,7 +30,7 @@ func (p *UpdateUserProfileUseCase) Handler(
 		return nil, errors.NewInternalServerError(
 			"Error getting user by id",
 			"",
-			errors2.ErrorUserAuthenticatedNotFound,
+			errors.ErrorUserAuthenticatedNotFound,
 		).AppError
 	}
 	if result == nil {
@@ -39,7 +38,7 @@ func (p *UpdateUserProfileUseCase) Handler(
 		return nil, errors.NewNotFoundError(
 			"Error getting user by id",
 			"",
-			errors2.ErrorUserAuthenticatedNotFound,
+			errors.ErrorUserAuthenticatedNotFound,
 		).AppError
 	}
 
@@ -47,13 +46,13 @@ func (p *UpdateUserProfileUseCase) Handler(
 		return nil, errors.NewInternalServerError(
 			"Error getting user by email",
 			"",
-			errors2.ErrorUserAuthenticatedNotFound,
+			errors.ErrorUserAuthenticatedNotFound,
 		).AppError
 	} else if resultGetByEmail != nil && resultGetByEmail.ID != result.ID {
 		return nil, errors.NewBadRequestError(
 			"Email already exists",
 			"The email "+newInformation.Email+"exists in our database",
-			errors2.ErrorUserEmailAlreadyExists,
+			errors.ErrorUserEmailAlreadyExists,
 		).AppError
 	}
 	result.Email = newInformation.Email
@@ -66,7 +65,7 @@ func (p *UpdateUserProfileUseCase) Handler(
 		return nil, errors.NewInternalServerError(
 			"Error updating user",
 			"",
-			errors2.ErrorUserAuthenticatedNotFound,
+			errors.ErrorUserAuthenticatedNotFound,
 		).AppError
 	}
 	return &response.UserLightDTO{

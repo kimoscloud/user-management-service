@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	errors2 "github.com/kimoscloud/user-management-service/internal/core/errors"
 	"github.com/kimoscloud/user-management-service/internal/core/model/response"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/repository"
@@ -29,14 +28,14 @@ func (p *GetUserUseCase) Handler(id string) (
 		return nil, errors.NewNotFoundError(
 			"Error getting user by id",
 			"",
-			errors2.ErrorUserAuthenticatedNotFound,
+			errors.ErrorUserAuthenticatedNotFound,
 		).AppError
 	}
 	if result == nil {
 		return nil, errors.NewNotFoundError(
 			"Error getting user by id",
 			"",
-			errors2.ErrorUserAuthenticatedNotFound,
+			errors.ErrorUserAuthenticatedNotFound,
 		).AppError
 	}
 	return &response.UserLightDTO{
