@@ -43,7 +43,7 @@ func NewUserController(
 }
 
 func (u UserController) InitRouter() {
-	api := u.gin.Group("/api/v1/user")
+	api := u.gin.Group("/api/v1/users")
 	api.POST("/signup", u.signUp)
 	api.POST("/login", u.login)
 	api.GET("/validate-token", u.validateToken)

@@ -9,7 +9,7 @@ import (
 func NewLogger() (logging.Logger, error) {
 	loggerImplementation := os.Getenv("LOGGER_IMPLEMENTATION")
 	if loggerImplementation == "" {
-		if os.Getenv("ENV") == "dev" {
+		if os.Getenv("ENV") == "dev" || os.Getenv("ENV") == "test" {
 			return &StandardLogger{}, nil
 		}
 	}
