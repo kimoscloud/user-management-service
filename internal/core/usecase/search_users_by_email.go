@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"github.com/kimoscloud/user-management-service/internal/core/model/entity/auth"
+	"github.com/kimoscloud/user-management-service/internal/core/model/entity"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	userRepository "github.com/kimoscloud/user-management-service/internal/core/ports/repository"
 	"github.com/kimoscloud/value-types/errors"
@@ -19,7 +19,7 @@ func NewSearchUserByEmailUseCase(userRepo userRepository.Repository, logger logg
 	}
 }
 
-func (uc SearchUserByEmailUseCase) Handler(search string) ([]auth.User, *errors.AppError) {
+func (uc SearchUserByEmailUseCase) Handler(search string) ([]entity.User, *errors.AppError) {
 	users, err := uc.userRepo.GetUserByEmailLike(search, 4)
 	if err != nil {
 		//TODO replace error code

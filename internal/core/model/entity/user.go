@@ -1,4 +1,4 @@
-package auth
+package entity
 
 import (
 	"gorm.io/gorm"

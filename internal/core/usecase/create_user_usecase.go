@@ -1,13 +1,13 @@
 package usecase
 
 import (
-	"github.com/kimoscloud/user-management-service/internal/core/model/entity/auth"
+	"github.com/kimoscloud/user-management-service/internal/core/model/entity"
 	auth2 "github.com/kimoscloud/user-management-service/internal/core/model/request/auth"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/logging"
 	"github.com/kimoscloud/user-management-service/internal/core/ports/repository"
+	"github.com/kimoscloud/user-management-service/internal/core/utils"
 	"github.com/kimoscloud/value-types/errors"
 	"github.com/kimoscloud/value-types/is_valid"
-	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
@@ -24,7 +24,7 @@ func NewCreateUserUseCase(
 }
 
 func (p *CreateUserUseCase) Handler(req *auth2.SignUpRequest) (
-	*auth.User,
+	*entity.User,
 	*errors.AppError,
 ) {
 	appError := validateSignUpRequest(req)
@@ -48,7 +48,7 @@ func (p *CreateUserUseCase) Handler(req *auth2.SignUpRequest) (
 		).AppError
 	}
 
-	hashedPassword, err := hashAndSalt(req.Password)
+	hashedPassword, err := utils.GeneratePassword(req.Password)
 	if err != nil {
 		p.logger.Error("Error hashing password", "errors", err.Error())
 		return nil, errors.NewInternalServerError(
@@ -57,7 +57,7 @@ func (p *CreateUserUseCase) Handler(req *auth2.SignUpRequest) (
 			errors.ErrorCreatingUser,
 		).AppError
 	}
-	user = &auth.User{
+	user = &entity.User{
 		Email:                      req.Email,
 		Hash:                       hashedPassword,
 		BadLoginAttempts:           0,
@@ -77,15 +77,6 @@ func (p *CreateUserUseCase) Handler(req *auth2.SignUpRequest) (
 		).AppError
 	}
 	return createUserResult, nil
-}
-
-func hashAndSalt(pwd string) (string, error) {
-	bytePassword := []byte(pwd)
-	hash, err := bcrypt.GenerateFromPassword(bytePassword, 10)
-	if err != nil {
-		return "", err
-	}
-	return string(hash), nil
 }
 
 func validateSignUpRequest(signUpRequest *auth2.SignUpRequest) *errors.AppError {

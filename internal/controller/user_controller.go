@@ -43,10 +43,10 @@ func NewUserController(
 }
 
 func (u UserController) InitRouter() {
-	api := u.gin.Group("/api/v1/users")
+	api := u.gin.Group("/api/v1/auth")
 	api.POST("/signup", u.signUp)
 	api.POST("/login", u.login)
-	api.GET("/validate-token", u.validateToken)
+	api.POST("/validate-token", u.validateToken)
 	secured := api.Group("", middleware.Auth())
 	{
 		secured.GET("/me", u.me)
