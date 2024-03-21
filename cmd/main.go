@@ -4,15 +4,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/kimoscloud/user-management-service/internal/controller"
-	"github.com/kimoscloud/user-management-service/internal/core/usecase/organization"
-	"github.com/kimoscloud/user-management-service/internal/core/usecase/user"
+	logging2 "github.com/kimoscloud/user-management-service/internal/core/ports/logging"
+	userRepository "github.com/kimoscloud/user-management-service/internal/core/ports/repository"
+	"github.com/kimoscloud/user-management-service/internal/core/usecase"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/configuration"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/db"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/logging"
-	organizationRepository "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/organization"
-	roleRepository "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/organization/role"
-	userOrganizationRepository "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/organization/user-organization"
-	user2 "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres/user"
+	userRepositoryPostgres "github.com/kimoscloud/user-management-service/internal/infrastructure/repository/postgres"
 	"github.com/kimoscloud/user-management-service/internal/infrastructure/server"
 	"log"
 	"os"
@@ -39,51 +37,32 @@ func main() {
 		log.Fatalf("failed to new logger err=%s\n", err.Error())
 	}
 	// Create the UserRepository
-	userRepo := user2.NewUserRepository(conn)
-	orgRepo := organizationRepository.NewOrganizationRepository(conn)
-	userOrgRepo := userOrganizationRepository.NewUserOrganizationRepository(conn)
-	roleRepo := roleRepository.NewRoleRepository(conn)
+	userRepo := userRepositoryPostgres.NewUserRepository(conn)
+	//projectRepo := projectRepositoryPostgres.NewProjectRepository(conn)
+	//userProjectRepo := userProjectRepositoryPostgres.NewUserProjectRepository(conn)
+	//teamProjectRepo := teamProjectRepositoryPostgres.NewTeamProjectRepository(conn)
 
-	createUserUseCase := user.NewCreateUserUseCase(userRepo, logger)
-	authenticateUserUseCase := user.NewAuthenticateUserUseCase(
-		userRepo,
-		logger,
-	)
-	getUserUseCase := user.NewGetUserUseCase(userRepo, logger)
-	updateUserProfileUseCase := user.NewUpdateUserProfileUseCase(
-		userRepo,
-		logger,
-	)
+	initUserController(instance, userRepo, logger)
+	//initOrganizationController(
+	//	instance,
+	//	orgRepo,
+	//	userOrgRepo,
+	//	roleRepo,
+	//	teamRepo,
+	//	teamMemberRepo,
+	//	userRepo,
+	//	logger,
+	//)
+	//initProjectController(
+	//	instance,
+	//	projectRepo,
+	//	userProjectRepo,
+	//	teamProjectRepo,
+	//	roleRepo,
+	//	userRepo,
+	//	logger,
+	//)
 
-	changePasswordUseCase := user.NewChangePasswordUseCase(
-		userRepo,
-		logger)
-
-	userController := controller.NewUserController(
-		instance,
-		logger,
-		createUserUseCase,
-		authenticateUserUseCase,
-		getUserUseCase,
-		updateUserProfileUseCase,
-		changePasswordUseCase,
-	)
-
-	createOrganizationUseCase := organization.NewCreateOrganizationUseCase(
-		orgRepo,
-		userOrgRepo,
-		roleRepo,
-		logger,
-	)
-
-	organizationController := controller.NewOrganizationController(
-		instance,
-		logger,
-		createOrganizationUseCase,
-	)
-
-	userController.InitRouter()
-	organizationController.InitRouter()
 	httpServer := server.NewHttpServer(
 		instance,
 		configuration.GetHttpServerConfig(),
@@ -104,4 +83,51 @@ func main() {
 	)
 	<-c
 	log.Println("graceful shutdown...")
+}
+
+// TODO use interfaces here
+//func initProjectController(
+//	instance *gin.Engine,
+//	projectRepo *projectRepositoryPostgres.RepositoryPostgres,
+//	userProjectRepo *userProjectRepositoryPostgres.RepositoryPostgres,
+//	teamProjectRepo *teamProjectRepositoryPostgres.RepositoryPostgres,
+//	roleRepo *roleRepositoryPostgres.RepositoryPostgres,
+//	userRepo userRepository.Repository,
+//	teamRepo *teamRepositoryPostgres.RepositoryPostgres,
+//	logger logging2.Logger,
+//) {
+//
+//}
+
+func initUserController(
+	instance *gin.Engine,
+	userRepo userRepository.Repository,
+	logger logging2.Logger,
+) {
+	createUserUseCase := usecase.NewCreateUserUseCase(userRepo, logger)
+	authenticateUserUseCase := usecase.NewAuthenticateUserUseCase(
+		userRepo,
+		logger,
+	)
+	getUserUseCase := usecase.NewGetUserUseCase(userRepo, logger)
+	updateUserProfileUseCase := usecase.NewUpdateUserProfileUseCase(
+		userRepo,
+		logger,
+	)
+
+	changePasswordUseCase := usecase.NewChangePasswordUseCase(
+		userRepo,
+		logger,
+	)
+
+	userController := controller.NewUserController(
+		instance,
+		logger,
+		createUserUseCase,
+		authenticateUserUseCase,
+		getUserUseCase,
+		updateUserProfileUseCase,
+		changePasswordUseCase,
+	)
+	userController.InitRouter()
 }

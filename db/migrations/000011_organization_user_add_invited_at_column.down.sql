@@ -1,1 +1,0 @@
-ALTER TABLE "Organization_Users" REMOVE COLUMN "invited_at"

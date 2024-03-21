@@ -1,1 +1,0 @@
-ALTER TABLE "Roles" REMOVE COLUMN "level"

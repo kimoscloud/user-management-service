@@ -44,8 +44,8 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git tag v0.0.6
-          git push origin v0.0.6
+          git tag v0.0.7
+          git push origin --tags
 
     env:
       GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}

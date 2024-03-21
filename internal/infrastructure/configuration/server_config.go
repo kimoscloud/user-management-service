@@ -28,7 +28,7 @@ func initHttpServerConfig() {
 	portStr := os.Getenv("APP_PORT")
 	port, err := strconv.Atoi(portStr)
 	if err != nil {
-		port = 10101
+		port = 8080
 	}
 
 	httpServerConfiguration = &HttpServerConfig{
